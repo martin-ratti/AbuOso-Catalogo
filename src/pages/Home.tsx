@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { FigureCard } from '../components/FigureCard';
 import { MOCK_FIGURES } from '../data/mock';
+import { LayoutGrid, Sparkles, Package, Smile, PawPrint, Sprout, TreePine } from 'lucide-react';
 
 const CATEGORIES = ['Todos', 'Nuevos', 'Combos', 'Ositos', 'Animalitos', 'Macetas', 'Navideñas'];
 
@@ -12,6 +13,19 @@ export function Home() {
     if (activeCategory === 'Nuevos') return figure.badge === 'novedad';
     return figure.category === activeCategory;
   });
+
+  const renderCategoryIcon = (cat: string) => {
+    switch (cat) {
+      case 'Todos': return <LayoutGrid size={28} strokeWidth={1.5} />;
+      case 'Nuevos': return <Sparkles size={28} strokeWidth={1.5} />;
+      case 'Combos': return <Package size={28} strokeWidth={1.5} />;
+      case 'Ositos': return <Smile size={28} strokeWidth={1.5} />;
+      case 'Animalitos': return <PawPrint size={28} strokeWidth={1.5} />;
+      case 'Macetas': return <Sprout size={28} strokeWidth={1.5} />;
+      case 'Navideñas': return <TreePine size={28} strokeWidth={1.5} />;
+      default: return <LayoutGrid size={28} strokeWidth={1.5} />;
+    }
+  };
 
   return (
     <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-6 sm:py-10">
@@ -40,16 +54,10 @@ export function Home() {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`snap-start flex flex-col items-center gap-2 min-w-[72px] transition-transform active:scale-95 ${activeCategory === cat ? 'opacity-100' : 'opacity-70 hover:opacity-100'}`}
+              className={`snap-start flex flex-col items-center gap-2 min-w-[72px] transition-transform active:scale-95 ${activeCategory === cat ? 'opacity-100' : 'opacity-70 hover:opacity-100 text-gray-500 hover:text-abu-brown'}`}
             >
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center text-xl shadow-sm border-2 ${activeCategory === cat ? 'border-abu-accent bg-abu-cream' : 'border-gray-200 bg-white'}`}>
-                {cat === 'Todos' && '🧸'}
-                {cat === 'Nuevos' && '✨'}
-                {cat === 'Combos' && '🎁'}
-                {cat === 'Ositos' && '🐻'}
-                {cat === 'Animalitos' && '🦒'}
-                {cat === 'Macetas' && '🪴'}
-                {cat === 'Navideñas' && '🎄'}
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center shadow-sm border-2 transition-colors ${activeCategory === cat ? 'border-abu-accent bg-abu-cream text-abu-brown' : 'border-gray-200 bg-white text-gray-400'}`}>
+                {renderCategoryIcon(cat)}
               </div>
               <span className={`text-[11px] font-bold text-center ${activeCategory === cat ? 'text-abu-brown' : 'text-gray-500'}`}>
                 {cat}
