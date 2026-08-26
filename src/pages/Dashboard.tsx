@@ -2,8 +2,7 @@ import { useAuthStore } from '../store/authStore';
 import { Navigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
-import { LogOut, Plus, Edit2, Trash2 } from 'lucide-react';
-import { MOCK_FIGURES } from '../data/mock';
+import { LogOut, PackageSearch, PlusCircle, Tags, FolderPlus } from 'lucide-react';
 
 export function Dashboard() {
   const { user, loading } = useAuthStore();
@@ -15,68 +14,72 @@ export function Dashboard() {
     signOut(auth);
   };
 
+  const adminActions = [
+    {
+      title: 'Ver Productos',
+      description: 'Listado completo para editar o borrar.',
+      icon: <PackageSearch size={32} className="text-abu-accent" />,
+      color: 'bg-orange-50 hover:bg-orange-100 border-orange-200'
+    },
+    {
+      title: 'Cargar Producto',
+      description: 'Agrega una nueva figura al catálogo.',
+      icon: <PlusCircle size={32} className="text-emerald-600" />,
+      color: 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200'
+    },
+    {
+      title: 'Ver Categorías',
+      description: 'Administra las burbujas del inicio.',
+      icon: <Tags size={32} className="text-blue-600" />,
+      color: 'bg-blue-50 hover:bg-blue-100 border-blue-200'
+    },
+    {
+      title: 'Nueva Categoría',
+      description: 'Crea una nueva burbuja de filtro.',
+      icon: <FolderPlus size={32} className="text-purple-600" />,
+      color: 'bg-purple-50 hover:bg-purple-100 border-purple-200'
+    }
+  ];
+
   return (
-    <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-6 sm:py-10 flex flex-col">
-      <div className="flex justify-between items-center mb-8">
+    <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-8 flex flex-col">
+      <div className="flex justify-between items-start sm:items-center mb-8 flex-col sm:flex-row gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-abu-brown">Panel de Administración</h2>
-          <p className="text-gray-500 text-sm">Administra tus figuras de yeso</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-abu-brown">Panel de Control</h2>
+          <p className="text-gray-500 mt-1">Bienvenido, {user.email}</p>
         </div>
         <button 
           onClick={handleLogout}
-          className="flex items-center gap-2 text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-lg font-medium transition-colors"
+          className="flex items-center gap-2 text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-xl font-bold transition-colors w-full sm:w-auto justify-center"
         >
-          <LogOut size={16} /> Salir
+          <LogOut size={18} /> Cerrar Sesión
         </button>
       </div>
 
-      <div className="bg-white rounded-3xl shadow-sm border border-abu-cream p-6 flex-1">
-        
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold text-abu-brown">Tus Figuras</h3>
-          <button className="flex items-center gap-2 bg-abu-accent hover:bg-[#7a4e2b] text-white px-4 py-2 rounded-lg font-medium transition-colors">
-            <Plus size={16} /> Nueva Figura
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {adminActions.map((action, idx) => (
+          <button 
+            key={idx}
+            className={`p-6 rounded-3xl border transition-all active:scale-95 text-left flex flex-col h-full gap-4 ${action.color}`}
+            onClick={() => alert(`Pronto programaremos la pantalla de: ${action.title}`)}
+          >
+            <div className="bg-white w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm">
+              {action.icon}
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-gray-800 mb-1">{action.title}</h3>
+              <p className="text-sm text-gray-600">{action.description}</p>
+            </div>
           </button>
+        ))}
+      </div>
+      
+      <div className="mt-8 bg-white p-6 rounded-3xl border border-abu-cream shadow-sm">
+        <h3 className="font-bold text-abu-brown mb-2">Resumen rápido</h3>
+        <div className="flex gap-4 text-sm text-gray-600">
+          <p>📦 8 Productos activos</p>
+          <p>🏷️ 7 Categorías</p>
         </div>
-
-        {/* Tabla / Lista de productos (Por ahora usa mock, luego usará Firebase) */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-abu-cream text-gray-500 text-sm">
-                <th className="pb-3 font-medium">Producto</th>
-                <th className="pb-3 font-medium">Categoría</th>
-                <th className="pb-3 font-medium">Precio</th>
-                <th className="pb-3 font-medium">Estado</th>
-                <th className="pb-3 font-medium text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {MOCK_FIGURES.map(fig => (
-                <tr key={fig.id} className="border-b border-abu-light hover:bg-abu-light/50 transition-colors">
-                  <td className="py-4 flex items-center gap-3">
-                    <img src={fig.imageUrl} alt={fig.name} className="w-10 h-10 rounded-md object-cover bg-abu-cream" />
-                    <span className="font-bold text-abu-dark text-sm">{fig.name}</span>
-                  </td>
-                  <td className="py-4 text-sm text-gray-600">{fig.category || '-'}</td>
-                  <td className="py-4 text-sm font-medium text-abu-accent">${fig.price}</td>
-                  <td className="py-4">
-                    <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">
-                      {fig.badge || 'Normal'}
-                    </span>
-                  </td>
-                  <td className="py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-md transition-colors"><Edit2 size={16} /></button>
-                      <button className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition-colors"><Trash2 size={16} /></button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
       </div>
     </main>
   );
