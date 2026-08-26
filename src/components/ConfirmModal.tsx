@@ -4,11 +4,12 @@ interface ConfirmModalProps {
   isOpen: boolean;
   title: string;
   message: string;
+  confirmText?: string;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
-export function ConfirmModal({ isOpen, title, message, onConfirm, onCancel }: ConfirmModalProps) {
+export function ConfirmModal({ isOpen, title, message, confirmText = 'Eliminar', onConfirm, onCancel }: ConfirmModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -42,7 +43,7 @@ export function ConfirmModal({ isOpen, title, message, onConfirm, onCancel }: Co
               }}
               className="flex-1 py-2.5 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 transition-colors shadow-sm"
             >
-              Eliminar
+              {confirmText}
             </button>
           </div>
         </div>

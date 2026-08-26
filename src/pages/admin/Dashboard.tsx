@@ -58,6 +58,7 @@ export function Dashboard() {
         isOpen={isLogoutModalOpen}
         title="Cerrar sesión"
         message="¿Estás seguro de que quieres cerrar la sesión de administrador?"
+        confirmText="Cerrar Sesión"
         onConfirm={confirmLogout}
         onCancel={() => setIsLogoutModalOpen(false)}
       />
