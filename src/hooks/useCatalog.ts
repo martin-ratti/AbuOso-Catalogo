@@ -26,7 +26,7 @@ export function useCatalog(activeCategory: string) {
       // 1. Filtro de Categoría
       const matchCategory = 
         activeCategory === 'Todos' || 
-        (activeCategory === 'Nuevos' && figure.badge === 'novedad') ||
+        (activeCategory === 'Novedades' && figure.badge === 'novedad') ||
         figure.category === activeCategory;
 
       // 2. Filtro de Búsqueda Inteligente (Ignora mayúsculas/minúsculas y acentos)

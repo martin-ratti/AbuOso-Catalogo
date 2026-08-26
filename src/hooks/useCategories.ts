@@ -11,7 +11,7 @@ export interface CatData {
 export function useCategories() {
   const [categories, setCategories] = useState<CatData[]>([
     { name: 'Todos', iconName: 'LayoutGrid' },
-    { name: 'Nuevos', iconName: 'Sparkles' }
+    { name: 'Novedades', iconName: 'Sparkles' }
   ]);
   const [loadingCats, setLoadingCats] = useState(true);
 
@@ -27,7 +27,7 @@ export function useCategories() {
       
       setCategories([
         { name: 'Todos', iconName: 'LayoutGrid' }, 
-        { name: 'Nuevos', iconName: 'Sparkles' }, 
+        { name: 'Novedades', iconName: 'Sparkles' }, 
         ...catData
       ]);
       setLoadingCats(false);
