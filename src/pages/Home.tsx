@@ -55,7 +55,7 @@ export function Home() {
       {/* Categorías */}
       <div className="mb-10">
         <h3 className="text-xl font-bold text-abu-brown mb-4 flex items-center gap-2">
-          Categorías Populares
+          Categorías
         </h3>
 
         {loadingCats ? (
