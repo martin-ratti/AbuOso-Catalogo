@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { collection, onSnapshot, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Trash2, Plus, Loader2, Tags } from 'lucide-react';
@@ -15,19 +15,19 @@ export function CategoryList() {
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      setLoading(true);
-      try {
-        const snapshot = await getDocs(collection(db, 'categories'));
-        const data = snapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
-        setCategories(data);
-      } catch {
-        addToast('Error al cargar categorías', 'error');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCategories();
+    setLoading(true);
+    const q = query(collection(db, 'categories'), orderBy('name', 'asc'));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
+      setCategories(data);
+      setLoading(false);
+    }, () => {
+      addToast('Error al cargar categorías', 'error');
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, [addToast]);
 
   const handleDeleteConfirm = async () => {

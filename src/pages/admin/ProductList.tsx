@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { collection, onSnapshot, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase';
 import type { Figure } from '../../types';
 import { Link } from 'react-router-dom';
@@ -16,19 +16,19 @@ export function ProductList() {
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchFigures = async () => {
-      setLoading(true);
-      try {
-        const snapshot = await getDocs(collection(db, 'figures'));
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Figure));
-        setFigures(data);
-      } catch {
-        addToast('Error al cargar productos', 'error');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchFigures();
+    setLoading(true);
+    const q = query(collection(db, 'figures'), orderBy('createdAt', 'desc'));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Figure));
+      setFigures(data);
+      setLoading(false);
+    }, () => {
+      addToast('Error al cargar productos', 'error');
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, [addToast]);
 
   const handleDeleteConfirm = async () => {

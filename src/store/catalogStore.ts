@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { Figure } from '../types';
 
@@ -8,7 +8,7 @@ interface CatalogState {
   loading: boolean;
   error: string | null;
   hasFetched: boolean;
-  fetchCatalog: () => Promise<void>;
+  fetchCatalog: () => void;
 }
 
 export const useCatalogStore = create<CatalogState>((set, get) => ({
@@ -17,24 +17,24 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
   error: null,
   hasFetched: false,
 
-  fetchCatalog: async () => {
-    // Si ya los trajo, no volver a traerlos (funciona como caché global)
+  fetchCatalog: () => {
+    // Si ya estamos suscritos, no hacer nada
     if (get().hasFetched || get().loading) return;
     
     set({ loading: true, error: null });
-    try {
-      const q = query(collection(db, 'figures'), orderBy('createdAt', 'desc'));
-      const snapshot = await getDocs(q);
-      
+    
+    const q = query(collection(db, 'figures'), orderBy('createdAt', 'desc'));
+    
+    onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       })) as Figure[];
 
       set({ figures: data, hasFetched: true, loading: false });
-    } catch (err) {
+    }, (err) => {
       console.error('Error fetching catalog:', err);
       set({ error: 'Ocurrió un error al cargar el catálogo.', loading: false });
-    }
+    });
   }
 }));
