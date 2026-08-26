@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useRef, useEffect } from 'react';
-import { Search, X, ShoppingBag, Plus, Minus, Send, XCircle, ArrowLeft } from 'lucide-react';
+import { Search, X, ShoppingBag, Plus, Minus, Send, XCircle, ArrowLeft, Store } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { useSearchStore } from '../store/searchStore';
 import { useCatalogStore } from '../store/catalogStore';
@@ -110,7 +110,7 @@ export function Navbar() {
             </div>
           )}
 
-          {!isAdmin && (
+          {!isAdmin ? (
             <div className="flex items-center gap-2 sm:gap-6">
               {/* Botón Carrito Global */}
               <button 
@@ -125,6 +125,19 @@ export function Navbar() {
                   </span>
                 )}
               </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <span className="hidden sm:inline-flex items-center bg-purple-100 text-purple-700 text-xs font-bold px-3 py-1.5 rounded-full border border-purple-200">
+                Modo Admin
+              </span>
+              <Link 
+                to="/" 
+                className="flex items-center gap-2 text-sm font-bold text-abu-brown hover:text-abu-accent transition-colors bg-abu-light py-2 px-4 rounded-full"
+              >
+                <Store size={18} />
+                <span className="hidden sm:inline">Ver Tienda</span>
+              </Link>
             </div>
           )}
         </div>
