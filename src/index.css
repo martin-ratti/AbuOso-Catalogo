@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+@theme {
+  --color-abu-brown: #5d3a21;
+  --color-abu-dark: #3b2313;
+  --color-abu-cream: #f4ebd8;
+  --color-abu-light: #fdfbf7;
+  --color-abu-accent: #8b5a33;
+}
+
+body {
+  background-color: var(--color-abu-light);
+  color: var(--color-abu-dark);
+}
