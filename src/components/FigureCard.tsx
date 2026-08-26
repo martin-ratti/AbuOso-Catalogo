@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Figure } from '../types';
 import { ShoppingCart, Share2 } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
@@ -13,6 +14,7 @@ interface FigureCardProps {
 }
 
 export function FigureCard({ figure }: FigureCardProps) {
+  const [imageLoaded, setImageLoaded] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
   
   const whatsappNumber = APP_CONFIG.WHATSAPP_NUMBER;
@@ -63,7 +65,8 @@ export function FigureCard({ figure }: FigureCardProps) {
         <img 
           src={figure.imageUrl} 
           alt={figure.name} 
-          className={`w-full h-full object-cover mix-blend-multiply transition-opacity ${figure.badge === 'agotado' ? 'grayscale opacity-60' : ''}`}
+          onLoad={() => setImageLoaded(true)}
+          className={`w-full h-full object-cover mix-blend-multiply transition-opacity duration-500 ${!imageLoaded ? 'opacity-0' : figure.badge === 'agotado' ? 'grayscale opacity-60' : 'opacity-100'}`}
           loading="lazy"
         />
         <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { FigureCard } from '../components/FigureCard';
+import { FigureCardSkeleton } from '../components/FigureCardSkeleton';
 import { useCatalog } from '../hooks/useCatalog';
 import { useCategories } from '../hooks/useCategories';
 import { Loader2 } from 'lucide-react';
@@ -63,8 +64,11 @@ export function Home() {
         
         {loadingCats ? (
           <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
-            {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className="w-24 h-24 bg-gray-200 animate-pulse rounded-2xl flex-shrink-0"></div>
+            {[1, 2, 3, 4, 5, 6, 7].map(i => (
+              <div key={i} className="flex flex-col items-center justify-center min-w-[100px] h-[100px] bg-gray-100 animate-pulse rounded-2xl flex-shrink-0 border border-gray-200 p-4">
+                <div className="w-8 h-8 bg-gray-200 rounded-full mb-2"></div>
+                <div className="w-16 h-3 bg-gray-200 rounded-md"></div>
+              </div>
             ))}
           </div>
         ) : (
@@ -97,8 +101,10 @@ export function Home() {
 
       {/* Grilla responsiva */}
       {loading ? (
-        <div className="flex justify-center py-12">
-          <Loader2 size={32} className="animate-spin text-abu-accent" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 lg:gap-5 mb-8">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(i => (
+            <FigureCardSkeleton key={i} />
+          ))}
         </div>
       ) : error ? (
         <div className="text-center py-12 bg-white rounded-2xl border border-red-200 bg-red-50">

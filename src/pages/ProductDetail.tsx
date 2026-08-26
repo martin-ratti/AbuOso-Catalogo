@@ -19,6 +19,7 @@ export function ProductDetail() {
 
   const [figure, setFigure] = useState<Figure | null>(null);
   const [loading, setLoading] = useState(true);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const addItem = useCartStore((state) => state.addItem);
 
@@ -77,9 +78,33 @@ export function ProductDetail() {
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center py-20">
-        <Loader2 size={40} className="animate-spin text-abu-accent" />
-      </div>
+      <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-6 sm:py-10 animate-pulse">
+        <div className="w-24 h-6 bg-gray-200 rounded-md mb-6" />
+        <div className="bg-white rounded-3xl shadow-sm border border-abu-cream overflow-hidden flex flex-col md:flex-row relative">
+          {/* Skeleton Imagen */}
+          <div className="w-full md:w-1/2 bg-gray-200 aspect-square md:aspect-auto" />
+          
+          {/* Skeleton Detalles */}
+          <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col gap-4">
+            <div className="w-20 h-6 bg-gray-200 rounded-full mb-2" /> {/* Badge */}
+            <div className="w-3/4 h-10 bg-gray-200 rounded-lg" /> {/* Título */}
+            <div className="w-1/3 h-8 bg-gray-200 rounded-lg mb-4" /> {/* Precio */}
+            
+            <div className="space-y-2 mt-4">
+              <div className="w-1/2 h-5 bg-gray-200 rounded-md mb-4" /> {/* Subtítulo */}
+              <div className="w-full h-4 bg-gray-200 rounded-md" />
+              <div className="w-full h-4 bg-gray-200 rounded-md" />
+              <div className="w-5/6 h-4 bg-gray-200 rounded-md" />
+              <div className="w-4/6 h-4 bg-gray-200 rounded-md" />
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 mt-12">
+              <div className="flex-1 h-14 bg-gray-200 rounded-xl" />
+              <div className="flex-1 h-14 bg-gray-200 rounded-xl" />
+            </div>
+          </div>
+        </div>
+      </main>
     );
   }
 
@@ -122,7 +147,8 @@ export function ProductDetail() {
           <img 
             src={figure.imageUrl} 
             alt={figure.name} 
-            className="w-full h-full object-cover mix-blend-multiply" 
+            onLoad={() => setImageLoaded(true)}
+            className={`w-full h-full object-cover mix-blend-multiply transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`} 
           />
         </div>
 
