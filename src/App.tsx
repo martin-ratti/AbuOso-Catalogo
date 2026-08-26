@@ -4,6 +4,7 @@ import { Home } from './pages/Home';
 import { ProductDetail } from './pages/ProductDetail';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/admin/Dashboard';
+import { ProductForm } from './pages/admin/ProductForm';
 import { Lock } from 'lucide-react';
 
 function App() {
@@ -17,7 +18,8 @@ function App() {
           <Route path="/producto/:id" element={<ProductDetail />} />
           <Route path="/admin" element={<Login />} />
           <Route path="/admin/dashboard" element={<Dashboard />} />
-          {/* Faltarían las rutas de ProductList, ProductForm, etc. las creamos en breve */}
+          <Route path="/admin/products/new" element={<ProductForm />} />
+          {/* Faltarían las rutas de ProductList, CategoryList, CategoryForm */}
         </Routes>
 
         <footer className="bg-abu-brown text-abu-cream py-8 text-center mt-auto relative">
