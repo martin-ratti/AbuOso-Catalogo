@@ -1,10 +1,14 @@
 import type { Figure } from '../types';
+import { ShoppingCart, MessageCircleHeart } from 'lucide-react';
+import { useCartStore } from '../store/cartStore';
 
 interface FigureCardProps {
   figure: Figure;
 }
 
 export function FigureCard({ figure }: FigureCardProps) {
+  const addItem = useCartStore((state) => state.addItem);
+  
   const whatsappNumber = "3464441120";
   const message = `¡Hola! Vengo del catálogo. Me interesa la figura '${figure.name}' ($${figure.price}). ¿Tienen stock?`;
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
@@ -51,10 +55,11 @@ export function FigureCard({ figure }: FigureCardProps) {
           {/* Botón Carrito */}
           <button 
             disabled={figure.badge === 'agotado'}
-            className="w-full bg-abu-light hover:bg-abu-cream text-abu-brown border border-abu-cream font-medium py-1.5 rounded-lg text-xs transition-colors active:scale-95 flex items-center justify-center gap-1 disabled:opacity-50 disabled:active:scale-100"
+            onClick={() => addItem(figure)}
+            className="w-full bg-abu-light hover:bg-abu-cream text-abu-brown border border-abu-cream font-medium py-1.5 rounded-lg text-xs transition-colors active:scale-95 flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:active:scale-100"
             title="Agregar al carrito"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            <ShoppingCart size={14} />
             Carrito
           </button>
           
@@ -63,10 +68,10 @@ export function FigureCard({ figure }: FigureCardProps) {
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full bg-[#25D366] hover:bg-[#20b858] text-white font-medium py-1.5 rounded-lg text-xs transition-colors active:scale-95 flex items-center justify-center gap-1"
+            className="w-full bg-[#25D366] hover:bg-[#20b858] text-white font-medium py-1.5 rounded-lg text-xs transition-colors active:scale-95 flex items-center justify-center gap-1.5"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-            WhatsApp
+            <MessageCircleHeart size={14} />
+            Pedir
           </a>
         </div>
       </div>

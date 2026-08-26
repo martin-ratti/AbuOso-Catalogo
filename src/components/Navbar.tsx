@@ -1,7 +1,24 @@
 import { useState } from 'react';
+import { Menu, Search, X, ShoppingBag, Home, Phone, XCircle, Plus, Minus, Send } from 'lucide-react';
+import { useCartStore } from '../store/cartStore';
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  // Extraer estado del carrito
+  const { isCartOpen, toggleCart, items, getCartCount, getCartTotal, updateQuantity, removeItem } = useCartStore();
+
+  const handleWhatsAppOrder = () => {
+    const whatsappNumber = "3464441120";
+    let message = "¡Hola! Quisiera realizar el siguiente pedido:\n\n";
+    items.forEach(item => {
+      message += `- ${item.quantity}x ${item.name} ($${item.price * item.quantity})\n`;
+    });
+    message += `\n*Total: $${getCartTotal()}*`;
+    
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
 
   return (
     <>
@@ -14,7 +31,7 @@ export function Navbar() {
               onClick={() => setIsMenuOpen(true)}
               className="p-1.5 sm:hidden text-abu-brown hover:bg-abu-cream rounded-md transition-colors"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+              <Menu size={24} />
             </button>
             <div className="flex items-center gap-2">
               <img 
@@ -35,17 +52,32 @@ export function Navbar() {
               placeholder="Buscar figuras, macetas..." 
               className="w-full bg-abu-light border border-abu-cream rounded-full py-2 pl-4 pr-10 text-sm focus:outline-none focus:border-abu-accent transition-colors text-abu-dark"
             />
-            <svg xmlns="http://www.w3.org/2000/svg" className="absolute right-3 top-2 text-gray-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <Search size={18} className="absolute right-3 top-2 text-gray-400" />
           </div>
 
-          <nav className="hidden sm:flex gap-4 lg:gap-6 text-abu-brown font-medium text-sm">
-            <a href="#" className="hover:text-abu-accent transition-colors">Catálogo</a>
-            <a href="#" className="hover:text-abu-accent transition-colors">Contacto</a>
-          </nav>
+          <div className="flex items-center gap-2 sm:gap-6">
+            <nav className="hidden sm:flex gap-4 lg:gap-6 text-abu-brown font-medium text-sm">
+              <a href="#" className="hover:text-abu-accent transition-colors">Catálogo</a>
+              <a href="#" className="hover:text-abu-accent transition-colors">Contacto</a>
+            </nav>
+            
+            {/* Botón Carrito Global */}
+            <button 
+              onClick={toggleCart}
+              className="relative p-2 text-abu-brown hover:bg-abu-cream rounded-full transition-colors"
+            >
+              <ShoppingBag size={22} />
+              {getCartCount() > 0 && (
+                <span className="absolute top-0 right-0 bg-abu-accent text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+                  {getCartCount()}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Overlay Oscuro para el menú */}
+      {/* Overlay Oscuro para el menú principal */}
       {isMenuOpen && (
         <div 
           className="fixed inset-0 bg-black/50 z-50 sm:hidden transition-opacity"
@@ -53,15 +85,15 @@ export function Navbar() {
         />
       )}
 
-      {/* Sidebar Móvil */}
-      <div className={`fixed top-0 left-0 bottom-0 w-[280px] bg-white z-50 transform transition-transform duration-300 ease-in-out sm:hidden flex flex-col ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      {/* Sidebar Móvil (Navegación) */}
+      <div className={`fixed top-0 left-0 bottom-0 w-[280px] bg-white z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-4 flex items-center justify-between border-b border-abu-cream">
           <div className="flex items-center gap-2">
             <img src="/logo.jpg" alt="Logo" className="w-8 h-8 rounded-full border border-abu-cream" />
             <h2 className="font-bold text-lg text-abu-brown">Menú</h2>
           </div>
           <button onClick={() => setIsMenuOpen(false)} className="p-1 text-gray-500 hover:text-abu-brown bg-abu-light rounded-full">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            <X size={20} />
           </button>
         </div>
         
@@ -73,24 +105,83 @@ export function Navbar() {
               placeholder="Buscar..." 
               className="w-full bg-abu-light border border-abu-cream rounded-xl py-2.5 pl-3 pr-10 text-sm focus:outline-none focus:border-abu-accent"
             />
-            <svg xmlns="http://www.w3.org/2000/svg" className="absolute right-3 top-3 text-gray-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <Search size={16} className="absolute right-3 top-3 text-gray-400" />
           </div>
 
-          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Categorías</h3>
-          <ul className="flex flex-col gap-3 text-abu-dark font-medium">
-            <li><a href="#" className="flex items-center gap-2 hover:text-abu-accent p-2 rounded-lg hover:bg-abu-light transition-colors"><span className="w-1.5 h-1.5 bg-abu-accent rounded-full"></span> Ositos</a></li>
-            <li><a href="#" className="flex items-center gap-2 hover:text-abu-accent p-2 rounded-lg hover:bg-abu-light transition-colors"><span className="w-1.5 h-1.5 bg-abu-accent rounded-full"></span> Navideñas</a></li>
-            <li><a href="#" className="flex items-center gap-2 hover:text-abu-accent p-2 rounded-lg hover:bg-abu-light transition-colors"><span className="w-1.5 h-1.5 bg-abu-accent rounded-full"></span> Animalitos</a></li>
-            <li><a href="#" className="flex items-center gap-2 hover:text-abu-accent p-2 rounded-lg hover:bg-abu-light transition-colors"><span className="w-1.5 h-1.5 bg-abu-accent rounded-full"></span> Macetas</a></li>
-          </ul>
-
-          <div className="mt-8 pt-6 border-t border-abu-cream">
+          <div className="mt-4 pt-4 border-t border-abu-cream">
              <ul className="flex flex-col gap-4 text-gray-600 text-sm">
-              <li><a href="#" className="flex items-center gap-2 hover:text-abu-brown"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> Inicio</a></li>
-              <li><a href="#" className="flex items-center gap-2 hover:text-abu-brown"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Contacto</a></li>
+              <li><a href="#" className="flex items-center gap-2 hover:text-abu-brown"><Home size={16} /> Inicio</a></li>
+              <li><a href="#" className="flex items-center gap-2 hover:text-abu-brown"><Phone size={16} /> Contacto</a></li>
             </ul>
           </div>
         </div>
+      </div>
+
+      {/* Overlay Oscuro para el carrito */}
+      {isCartOpen && (
+        <div 
+          className="fixed inset-0 bg-black/40 z-[60] transition-opacity"
+          onClick={toggleCart}
+        />
+      )}
+
+      {/* Sidebar del Carrito */}
+      <div className={`fixed top-0 right-0 bottom-0 w-full max-w-[340px] bg-white z-[70] shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className="p-4 flex items-center justify-between border-b border-abu-cream bg-abu-light">
+          <div className="flex items-center gap-2 text-abu-brown">
+            <ShoppingBag size={20} />
+            <h2 className="font-bold text-lg">Tu Pedido</h2>
+          </div>
+          <button onClick={toggleCart} className="p-1 text-gray-500 hover:text-abu-brown bg-white rounded-full border border-gray-200">
+            <X size={20} />
+          </button>
+        </div>
+        
+        <div className="p-4 flex-1 overflow-y-auto flex flex-col gap-4">
+          {items.length === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-gray-400 gap-3">
+              <ShoppingBag size={48} className="opacity-20" />
+              <p>Tu carrito está vacío.</p>
+            </div>
+          ) : (
+            items.map(item => (
+              <div key={item.id} className="flex gap-3 items-center border border-abu-cream p-2 rounded-xl">
+                <img src={item.imageUrl} alt={item.name} className="w-16 h-16 rounded-lg object-cover bg-abu-cream" />
+                <div className="flex-1 flex flex-col">
+                  <h4 className="font-bold text-sm text-abu-brown leading-tight">{item.name}</h4>
+                  <p className="text-abu-accent text-sm font-medium">${item.price}</p>
+                  
+                  <div className="flex items-center justify-between mt-2">
+                    <div className="flex items-center gap-2 bg-abu-light rounded-lg border border-abu-cream">
+                      <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="p-1 hover:text-abu-accent"><Minus size={14} /></button>
+                      <span className="text-xs font-bold w-4 text-center">{item.quantity}</span>
+                      <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="p-1 hover:text-abu-accent"><Plus size={14} /></button>
+                    </div>
+                    <button onClick={() => removeItem(item.id)} className="text-gray-400 hover:text-red-500 p-1">
+                      <XCircle size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {items.length > 0 && (
+          <div className="p-4 border-t border-abu-cream bg-abu-light">
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-gray-600 font-medium">Total estimado:</span>
+              <span className="text-xl font-bold text-abu-brown">${getCartTotal()}</span>
+            </div>
+            <button 
+              onClick={handleWhatsAppOrder}
+              className="w-full bg-[#25D366] hover:bg-[#20b858] text-white font-bold py-3 rounded-xl transition-colors active:scale-[0.98] flex items-center justify-center gap-2"
+            >
+              <Send size={18} />
+              Enviar pedido por WhatsApp
+            </button>
+          </div>
+        )}
       </div>
     </>
   );
