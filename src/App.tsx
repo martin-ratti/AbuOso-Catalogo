@@ -32,6 +32,34 @@ const MOCK_FIGURES: Figure[] = [
     price: 1800,
     imageUrl: 'https://images.unsplash.com/photo-1540306126607-bb9d57a2dfec?auto=format&fit=crop&q=80&w=600'
   },
+  {
+    id: '5',
+    name: 'Perrito Sentado',
+    description: 'Tierna figura de perrito para decorar estantes o regalar a los amantes de las mascotas.',
+    price: 1400,
+    imageUrl: 'https://images.unsplash.com/photo-1584852332675-523277717643?auto=format&fit=crop&q=80&w=600'
+  },
+  {
+    id: '6',
+    name: 'Maceta Geométrica',
+    description: 'Mini maceta de yeso ideal para suculentas pequeñas. Diseño moderno y minimalista.',
+    price: 2500,
+    imageUrl: 'https://images.unsplash.com/photo-1628155930542-3c7a64e2c833?auto=format&fit=crop&q=80&w=600'
+  },
+  {
+    id: '7',
+    name: 'Búho Sabio',
+    description: 'Figura de búho con textura de plumas muy detallada. Perfecto centro de mesa.',
+    price: 1900,
+    imageUrl: 'https://images.unsplash.com/photo-1559441113-d47660232414?auto=format&fit=crop&q=80&w=600'
+  },
+  {
+    id: '8',
+    name: 'Elefantito de la Suerte',
+    description: 'Elefante de yeso con la trompa hacia arriba. Clásico adorno para atraer la buena fortuna.',
+    price: 1600,
+    imageUrl: 'https://images.unsplash.com/photo-1540306126607-bb9d57a2dfec?auto=format&fit=crop&q=80&w=600'
+  },
 ];
 
 function App() {
@@ -64,8 +92,8 @@ function App() {
           </span>
         </div>
 
-        {/* Grilla responsiva: 1 col en móvil, 2 en tablet, 3/4 en escritorio */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {/* Grilla responsiva: 2 col en móvil, 3 en tablet, 4/5/6 en escritorio */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 lg:gap-5">
           {MOCK_FIGURES.map(figure => (
             <FigureCard key={figure.id} figure={figure} />
           ))}
