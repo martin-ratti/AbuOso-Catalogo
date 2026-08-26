@@ -5,6 +5,7 @@ import { useSearchStore } from '../store/searchStore';
 import { useCatalogStore } from '../store/catalogStore';
 import { createSlug } from '../utils/slug';
 import { APP_CONFIG } from '../config/constants';
+import { formatPrice } from '../utils/format';
 
 export function Navbar() {
   const location = useLocation();
@@ -15,9 +16,9 @@ export function Navbar() {
     const whatsappNumber = APP_CONFIG.WHATSAPP_NUMBER;
     let message = "¡Hola! Quisiera realizar el siguiente pedido:\n\n";
     items.forEach(item => {
-      message += `- ${item.quantity}x ${item.name} ($${item.price * item.quantity})\n`;
+      message += `- ${item.quantity}x ${item.name} ($${formatPrice(item.price * item.quantity)})\n`;
     });
-    message += `\n*Total: $${getCartTotal()}*`;
+    message += `\n*Total: $${formatPrice(getCartTotal())}*`;
     
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -85,7 +86,7 @@ export function Navbar() {
                         <img src={figure.imageUrl} alt={figure.name} className="w-12 h-12 rounded-xl object-cover bg-abu-cream" />
                         <div>
                           <p className="font-bold text-sm text-abu-brown">{figure.name}</p>
-                          <p className="text-xs font-medium text-abu-accent">${figure.price}</p>
+                          <p className="text-xs font-medium text-abu-accent">${formatPrice(figure.price)}</p>
                         </div>
                       </Link>
                     ));
@@ -153,7 +154,7 @@ export function Navbar() {
                 <img src={item.imageUrl} alt={item.name} className="w-20 h-20 rounded-xl object-cover bg-abu-light" />
                 <div className="flex-1 flex flex-col">
                   <h4 className="font-bold text-sm text-abu-brown leading-tight mb-1">{item.name}</h4>
-                  <p className="text-abu-accent text-sm font-bold mb-3">${item.price}</p>
+                  <p className="text-abu-accent text-sm font-bold mb-3">${formatPrice(item.price)}</p>
                   
                   <div className="flex items-center justify-between mt-auto">
                     <div className="flex items-center gap-3 bg-abu-light rounded-xl border border-abu-cream px-1 py-1">
@@ -175,19 +176,19 @@ export function Navbar() {
           <div className="p-4 border-t border-abu-cream bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
             <div className="flex justify-between items-center mb-4 bg-abu-light p-3 rounded-xl border border-abu-cream">
               <span className="text-gray-600 font-bold">Total estimado:</span>
-              <span className="text-2xl font-black text-abu-brown">${getCartTotal()}</span>
+              <span className="text-2xl font-black text-abu-brown">${formatPrice(getCartTotal())}</span>
             </div>
             <div className="flex flex-col gap-2">
               <button 
                 onClick={handleWhatsAppOrder}
-                className="w-full bg-[#25D366] hover:bg-[#20b858] text-white font-bold py-3.5 rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm"
+                className="w-full bg-[#25D366] hover:bg-[#20b858] text-white font-bold py-3.5 rounded-xl transition-all active:scale-95 hover:shadow-md flex items-center justify-center gap-2"
               >
                 <Send size={18} />
                 Enviar pedido por WhatsApp
               </button>
               <button 
                 onClick={toggleCart}
-                className="w-full bg-white hover:bg-abu-light text-abu-brown border-2 border-abu-cream font-bold py-3.5 rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                className="w-full bg-white hover:bg-abu-light text-abu-brown border-2 border-abu-cream font-bold py-3.5 rounded-xl transition-all active:scale-95 hover:shadow-sm flex items-center justify-center gap-2"
               >
                 Seguir Comprando
               </button>

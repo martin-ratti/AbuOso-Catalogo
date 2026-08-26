@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, Trash2, Edit, Plus, Loader2 } from 'lucide-react';
 import { useToastStore } from '../../store/toastStore';
 import { ConfirmModal } from '../../components/ConfirmModal';
+import { formatPrice } from '../../utils/format';
 
 export function ProductList() {
   const [figures, setFigures] = useState<Figure[]>([]);
@@ -56,7 +57,7 @@ export function ProductList() {
         <Link to="/admin/dashboard" className="text-abu-brown hover:text-abu-accent flex items-center gap-2 font-medium">
           <ArrowLeft size={18} /> Volver
         </Link>
-        <Link to="/admin/products/new" className="bg-emerald-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 font-bold hover:bg-emerald-700">
+        <Link to="/admin/products/new" className="bg-emerald-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 font-bold hover:bg-emerald-700 transition-all active:scale-95 hover:shadow-md">
           <Plus size={18} /> Nuevo
         </Link>
       </div>
@@ -78,7 +79,7 @@ export function ProductList() {
                   )}
                   <div>
                     <h3 className="font-bold text-abu-brown">{fig.name}</h3>
-                    <p className="text-sm text-gray-500">{fig.category} • ${fig.price}</p>
+                    <p className="text-sm text-gray-500">{fig.category} • ${formatPrice(fig.price)}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
