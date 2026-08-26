@@ -5,6 +5,7 @@ import { useToastStore } from '../store/toastStore';
 import { Link } from 'react-router-dom';
 import { handleShare } from '../utils/shareUtils';
 import { createSlug } from '../utils/slug';
+import { APP_CONFIG } from '../config/constants';
 
 interface FigureCardProps {
   figure: Figure;
@@ -13,7 +14,7 @@ interface FigureCardProps {
 export function FigureCard({ figure }: FigureCardProps) {
   const addItem = useCartStore((state) => state.addItem);
   
-  const whatsappNumber = "3464441120";
+  const whatsappNumber = APP_CONFIG.WHATSAPP_NUMBER;
   const message = `¡Hola! Vengo del catálogo. Me interesa la figura '${figure.name}' ($${figure.price}). ¿Tienen stock?`;
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 

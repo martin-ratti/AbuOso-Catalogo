@@ -1,26 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { FigureCard } from '../components/FigureCard';
-import { collection, getDocs, orderBy, query } from 'firebase/firestore';
-import { db } from '../firebase';
-import type { Figure } from '../types';
+import { useCatalog } from '../hooks/useCatalog';
+import { useCategories } from '../hooks/useCategories';
+import { Loader2 } from 'lucide-react';
 import { 
   Smile, PawPrint, TreePine, Sprout, Package, Sparkles, Star, Heart, Gift, Moon, Sun, Flower, Palette, Brush, Wand2, LayoutGrid,
   Dog, Cat, Rabbit, Bird, Fish, Bug, Leaf, 
   Apple, Carrot, Cake, Coffee,
   Car, Plane, Rocket, Music, Guitar,
   Gamepad, Trophy, Crown, Diamond,
-  Book, Camera, Home as HomeIcon, Zap, Flame, Snowflake, Cloud, Loader2,
+  Book, Camera, Home as HomeIcon, Zap, Flame, Snowflake, Cloud,
   Church, Cross, Droplet, Waves, HandHeart,
   Baby, Footprints, PiggyBank, Coins, Feather, Hexagon, Circle, Box, Lamp, Eye, Ghost, Shell, Bone, Anchor, Bell
 } from 'lucide-react';
 
-interface CatData {
-  name: string;
-  imageUrl?: string;
-  iconName?: string;
-}
-
-const ICON_MAP: Record<string, React.ElementType> = {
+const LOCAL_ICON_MAP: Record<string, React.ElementType> = {
   LayoutGrid, Sparkles, Package, Smile, PawPrint, TreePine, Sprout, Star, Heart, Gift, Moon, Sun, Flower, Palette, Brush, Wand2,
   Dog, Cat, Rabbit, Bird, Fish, Bug, Leaf, 
   Apple, Carrot, Cake, Coffee,
@@ -33,120 +27,72 @@ const ICON_MAP: Record<string, React.ElementType> = {
 
 export function Home() {
   const [activeCategory, setActiveCategory] = useState('Todos');
-  const [figures, setFigures] = useState<Figure[]>([]);
-  const [categories, setCategories] = useState<CatData[]>([
-    { name: 'Todos', iconName: 'LayoutGrid' },
-    { name: 'Nuevos', iconName: 'Sparkles' }
-  ]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setError(null);
-        // Fetch categories
-        const catSnap = await getDocs(collection(db, 'categories'));
-        const catData = catSnap.docs.map(doc => ({
-          name: doc.data().name,
-          imageUrl: doc.data().imageUrl,
-          iconName: doc.data().iconName
-        }));
-        setCategories([{ name: 'Todos', iconName: 'LayoutGrid' }, { name: 'Nuevos', iconName: 'Sparkles' }, ...catData]);
-
-        // Fetch figures
-        const q = query(collection(db, 'figures'), orderBy('createdAt', 'desc'));
-        const snapshot = await getDocs(q);
-        const data = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Figure[];
-        
-        setFigures(data);
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Ocurrió un error al cargar el catálogo. Por favor, intenta recargar la página.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-
-  const filteredFigures = figures.filter(figure => {
-    if (activeCategory === 'Todos') return true;
-    if (activeCategory === 'Nuevos') return figure.badge === 'novedad';
-    return figure.category === activeCategory;
-  });
-
-  const renderCategoryIcon = (cat: CatData) => {
-    if (cat.imageUrl) {
-      return <img src={cat.imageUrl} alt={cat.name} className="w-10 h-10 object-cover rounded-full mix-blend-multiply" />;
-    }
-    
-    if (cat.iconName && ICON_MAP[cat.iconName]) {
-      const Icon = ICON_MAP[cat.iconName];
-      return <Icon size={28} strokeWidth={1.5} />;
-    }
-
-    // Fallbacks para datos legacy
-    switch (cat.name) {
-      case 'Todos': return <LayoutGrid size={28} strokeWidth={1.5} />;
-      case 'Nuevos': return <Sparkles size={28} strokeWidth={1.5} />;
-      case 'Combos': return <Package size={28} strokeWidth={1.5} />;
-      case 'Ositos': return <Smile size={28} strokeWidth={1.5} />;
-      case 'Animalitos': return <PawPrint size={28} strokeWidth={1.5} />;
-      case 'Macetas': return <Sprout size={28} strokeWidth={1.5} />;
-      case 'Navideñas': return <TreePine size={28} strokeWidth={1.5} />;
-      default: return <LayoutGrid size={28} strokeWidth={1.5} />;
-    }
-  };
+  
+  // Custom hooks
+  const { categories, loadingCats } = useCategories();
+  const { figures, loading, loadingMore, hasMore, error, loadMore } = useCatalog(activeCategory);
 
   return (
-    <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-6 sm:py-10">
-      
-      {/* Encabezado */}
-      <div className="mb-8 text-center sm:text-left flex flex-col sm:flex-row items-center gap-6 bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-abu-cream">
-        <img 
-          src="/logo.jpg" 
-          alt="AbuOso Artesanías" 
-          className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border-4 border-abu-cream shadow-md"
-        />
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-abu-dark mb-2">
-            Crear con las manos alimenta el alma
+    <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-8">
+      {/* Banner Principal */}
+      <div className="bg-gradient-to-r from-abu-light to-[#f8e1e5] rounded-3xl p-6 sm:p-10 mb-10 flex flex-col md:flex-row items-center justify-between border border-abu-cream shadow-sm relative overflow-hidden">
+        <div className="z-10 text-center md:text-left mb-6 md:mb-0 max-w-xl">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-abu-brown mb-4 tracking-tight leading-tight">
+            Encuentra la figura perfecta para pintar
           </h2>
-          <p className="text-gray-600 max-w-2xl text-sm sm:text-base">
-            Figuras de yeso hechas con amor. Ideales para decorar tus espacios, pintar en familia o regalar un detalle único.
+          <p className="text-gray-600 text-base sm:text-lg">
+            Explora nuestro catálogo de figuras de yeso artesanales. ¡Calidad y detalle en cada pieza!
           </p>
         </div>
-      </div>
-
-      {/* Burbujas de Categorías */}
-      <div className="mb-8">
-        <div className="flex overflow-x-auto pb-4 pt-2 -mx-4 px-4 sm:mx-0 sm:px-0 gap-3 hide-scrollbar snap-x">
-          {categories.map(cat => (
-            <button
-              key={cat.name}
-              onClick={() => setActiveCategory(cat.name)}
-              className={`snap-start flex flex-col items-center gap-2 min-w-[72px] transition-transform active:scale-95 ${activeCategory === cat.name ? 'opacity-100' : 'opacity-70 hover:opacity-100 text-gray-500 hover:text-abu-brown'}`}
-            >
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center shadow-sm border-2 transition-colors ${activeCategory === cat.name ? 'border-abu-accent bg-abu-cream text-abu-brown' : 'border-gray-200 bg-white text-gray-400'}`}>
-                {renderCategoryIcon(cat)}
-              </div>
-              <span className={`text-[11px] font-bold text-center ${activeCategory === cat.name ? 'text-abu-brown' : 'text-gray-500'}`}>
-                {cat.name}
-              </span>
-            </button>
-          ))}
+        <div className="z-10 relative">
+          <div className="w-32 h-32 sm:w-48 sm:h-48 rounded-full border-4 border-white shadow-xl overflow-hidden bg-white flex-shrink-0">
+            <img src="/logo.jpg" alt="Osito de yeso" className="w-full h-full object-cover" />
+          </div>
+          <div className="absolute -bottom-4 -right-4 bg-abu-accent text-white font-bold px-4 py-2 rounded-2xl shadow-lg transform rotate-12 text-sm sm:text-base">
+            ¡Hecho a mano!
+          </div>
         </div>
+        <div className="absolute top-0 right-0 w-full h-full opacity-10 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-abu-accent via-transparent to-transparent pointer-events-none"></div>
       </div>
 
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-bold text-abu-brown">{activeCategory === 'Todos' ? 'Catálogo' : activeCategory}</h3>
-        <span className="text-xs font-medium text-abu-accent bg-abu-cream px-2.5 py-1 rounded-full">
-          {filteredFigures.length} figuras
-        </span>
+      {/* Categorías */}
+      <div className="mb-10">
+        <h3 className="text-xl font-bold text-abu-brown mb-4 flex items-center gap-2">
+          Categorías Populares
+        </h3>
+        
+        {loadingCats ? (
+          <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className="w-24 h-24 bg-gray-200 animate-pulse rounded-2xl flex-shrink-0"></div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide snap-x">
+            {categories.map((cat) => {
+              const IconComponent = cat.iconName ? LOCAL_ICON_MAP[cat.iconName] : LOCAL_ICON_MAP['Package'];
+              
+              return (
+                <button
+                  key={cat.name}
+                  onClick={() => setActiveCategory(cat.name)}
+                  className={`flex flex-col items-center justify-center min-w-[100px] p-4 rounded-2xl transition-all snap-center shadow-sm border ${
+                    activeCategory === cat.name 
+                      ? 'bg-abu-brown text-white border-abu-brown scale-105' 
+                      : 'bg-white text-gray-600 hover:bg-abu-light border-abu-cream'
+                  }`}
+                >
+                  {cat.imageUrl ? (
+                    <img src={cat.imageUrl} alt={cat.name} className="w-8 h-8 object-cover mb-2" />
+                  ) : (
+                    IconComponent && <IconComponent size={28} className="mb-2" />
+                  )}
+                  <span className="text-sm font-bold whitespace-nowrap">{cat.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Grilla responsiva */}
@@ -159,15 +105,33 @@ export function Home() {
           <p className="text-red-500 font-medium mb-4">{error}</p>
           <button onClick={() => window.location.reload()} className="bg-red-100 text-red-600 px-4 py-2 rounded-xl hover:bg-red-200 transition-colors">Reintentar</button>
         </div>
-      ) : filteredFigures.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 lg:gap-5">
-          {filteredFigures.map(figure => (
-            <FigureCard key={figure.id} figure={figure} />
-          ))}
-        </div>
+      ) : figures.length > 0 ? (
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 lg:gap-5 mb-8">
+            {figures.map(figure => (
+              <FigureCard key={figure.id} figure={figure} />
+            ))}
+          </div>
+          
+          {hasMore && (
+            <div className="flex justify-center mt-8">
+              <button 
+                onClick={loadMore}
+                disabled={loadingMore}
+                className="bg-white hover:bg-abu-light text-abu-brown border-2 border-abu-cream font-bold py-3 px-8 rounded-full transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
+              >
+                {loadingMore ? (
+                  <><Loader2 size={18} className="animate-spin" /> Cargando...</>
+                ) : (
+                  'Ver más figuras'
+                )}
+              </button>
+            </div>
+          )}
+        </>
       ) : (
         <div className="text-center py-12 bg-white rounded-2xl border border-abu-cream">
-          <p className="text-gray-500">No hay figuras en esta categoría por el momento.</p>
+          <p className="text-gray-500">No hay figuras que coincidan con tu búsqueda por el momento.</p>
         </div>
       )}
     </main>
