@@ -4,4 +4,6 @@ export interface Figure {
   description: string;
   price: number;
   imageUrl: string;
+  category?: string;
+  badge?: 'stock' | 'pedido' | 'agotado' | 'novedad';
 }
