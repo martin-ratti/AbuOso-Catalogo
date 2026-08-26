@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Menu, Search, X, ShoppingBag, Home, Phone, XCircle, Plus, Minus, Send } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Search, X, ShoppingBag, Plus, Minus, Send, XCircle } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 
 export function Navbar() {
@@ -24,7 +24,7 @@ export function Navbar() {
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
           
           {/* Logo */}
-          <div className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <img 
               src="/logo.jpg" 
               alt="AbuOso Logo" 
@@ -33,7 +33,7 @@ export function Navbar() {
             <h1 className="font-bold text-lg sm:text-xl text-abu-brown tracking-tight">
               AbuOso <span className="font-medium text-abu-accent hidden sm:inline">Artesanías</span>
             </h1>
-          </div>
+          </Link>
           
           {/* Barra de búsqueda (Desktop) */}
           <div className="flex-1 max-w-md relative hidden sm:block">

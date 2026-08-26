@@ -4,11 +4,18 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { Figure } from '../types';
 import { MOCK_FIGURES } from '../data/mock';
-import { ArrowLeft, ShoppingCart, Loader2 } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Loader2, Share2 } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
+import { useToastStore } from '../store/toastStore';
+import { handleShare } from '../utils/shareUtils';
+import { createSlug } from '../utils/slug';
 
 export function ProductDetail() {
-  const { id } = useParams();
+  const { id: slugId } = useParams();
+  
+  // Extraemos el ID real del final del slug (ej: osito-dormilon-8yFvK...)
+  const id = slugId ? slugId.split('-').pop() : undefined;
+
   const [figure, setFigure] = useState<Figure | null>(null);
   const [loading, setLoading] = useState(true);
   const addItem = useCartStore((state) => state.addItem);
@@ -40,6 +47,36 @@ export function ProductDetail() {
     fetchFigure();
   }, [id]);
 
+  useEffect(() => {
+    if (figure) {
+      document.title = `${figure.name} | AbuOso Artesanías`;
+      
+      const productSlug = createSlug(figure.name, figure.id);
+      const canonicalUrl = `${window.location.origin}/producto/${productSlug}`;
+
+      // Intentar actualizar meta tags (OG)
+      const setMetaTag = (property: string, content: string) => {
+        let tag = document.querySelector(`meta[property="${property}"]`);
+        if (!tag) {
+          tag = document.createElement('meta');
+          tag.setAttribute('property', property);
+          document.head.appendChild(tag);
+        }
+        tag.setAttribute('content', content);
+      };
+
+      setMetaTag('og:title', `${figure.name} - AbuOso Artesanías`);
+      setMetaTag('og:description', figure.description || 'Figuras de yeso artesanales.');
+      setMetaTag('og:image', figure.imageUrl || '');
+      setMetaTag('og:url', canonicalUrl);
+      setMetaTag('og:type', 'product');
+
+      return () => {
+        document.title = 'AbuOso Artesanías';
+      };
+    }
+  }, [figure]);
+
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center py-20">
@@ -63,13 +100,24 @@ export function ProductDetail() {
   const message = `¡Hola! Vengo del catálogo. Me interesa la figura '${figure.name}' ($${figure.price}). ¿Tienen stock?`;
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
+  const productSlug = createSlug(figure.name, figure.id);
+  const canonicalUrl = `${window.location.origin}/producto/${productSlug}`;
+
+  const onShare = () => {
+    handleShare({
+      title: `AbuOso Artesanías - ${figure.name}`,
+      text: `¡Mirá esta figura: ${figure.name} a solo $${figure.price}!`,
+      url: canonicalUrl
+    });
+  };
+
   return (
     <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-6 sm:py-10">
       <Link to="/" className="inline-flex items-center gap-2 text-abu-brown hover:text-abu-accent mb-6 transition-colors">
         <ArrowLeft size={20} /> Volver
       </Link>
 
-      <div className="bg-white rounded-3xl shadow-sm border border-abu-cream overflow-hidden flex flex-col md:flex-row">
+      <div className="bg-white rounded-3xl shadow-sm border border-abu-cream overflow-hidden flex flex-col md:flex-row relative">
         {/* Imagen del producto */}
         <div className="w-full md:w-1/2 bg-abu-cream/30 aspect-square md:aspect-auto">
           <img 
@@ -80,14 +128,23 @@ export function ProductDetail() {
         </div>
 
         {/* Detalles */}
-        <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col">
+        <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col relative">
+          
+          <button 
+            onClick={onShare}
+            className="absolute top-6 right-6 p-2 bg-abu-light text-gray-500 hover:text-abu-accent hover:bg-abu-cream rounded-full transition-colors"
+            title="Compartir producto"
+          >
+            <Share2 size={20} />
+          </button>
+
           {figure.badge && (
             <span className="inline-block bg-abu-cream text-abu-accent font-bold px-3 py-1 rounded-full text-xs uppercase tracking-wide w-fit mb-4">
               {figure.badge}
             </span>
           )}
           
-          <h1 className="text-3xl md:text-4xl font-bold text-abu-brown mb-2">{figure.name}</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-abu-brown mb-2 pr-10">{figure.name}</h1>
           <p className="text-2xl font-bold text-abu-accent mb-6">${figure.price}</p>
           
           <div className="prose prose-sm text-gray-600 mb-8 flex-1">
@@ -102,7 +159,10 @@ export function ProductDetail() {
           <div className="flex flex-col sm:flex-row gap-3 mt-auto">
             <button 
               disabled={figure.badge === 'agotado'}
-              onClick={() => addItem(figure)}
+              onClick={() => {
+                addItem(figure);
+                useToastStore.getState().addToast(`¡${figure.name} agregado al carrito!`, 'success');
+              }}
               className="flex-1 bg-abu-light hover:bg-abu-cream text-abu-brown border border-abu-cream font-bold py-3 rounded-xl transition-colors active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
             >
               <ShoppingCart size={18} />

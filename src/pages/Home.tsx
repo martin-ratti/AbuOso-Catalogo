@@ -4,33 +4,72 @@ import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { Figure } from '../types';
 import { MOCK_FIGURES } from '../data/mock';
-import { LayoutGrid, Sparkles, Package, Smile, PawPrint, Sprout, TreePine, Loader2 } from 'lucide-react';
+import { 
+  Smile, PawPrint, TreePine, Sprout, Package, Sparkles, Star, Heart, Gift, Moon, Sun, Flower, Palette, Brush, Wand2, LayoutGrid,
+  Dog, Cat, Rabbit, Bird, Fish, Bug, Leaf, 
+  Apple, Carrot, Cake, Coffee,
+  Car, Plane, Rocket, Music, Guitar,
+  Gamepad, Trophy, Crown, Diamond,
+  Book, Camera, Home as HomeIcon, Zap, Flame, Snowflake, Cloud, Loader2,
+  Church, Cross, Droplet, Waves, HandHeart,
+  Baby, Footprints, PiggyBank, Coins, Feather, Hexagon, Circle, Box, Lamp, Eye, Ghost, Shell, Bone, Anchor, Bell
+} from 'lucide-react';
 
-const CATEGORIES = ['Todos', 'Nuevos', 'Combos', 'Ositos', 'Animalitos', 'Macetas', 'Navideñas'];
+interface CatData {
+  name: string;
+  imageUrl?: string;
+  iconName?: string;
+}
+
+const ICON_MAP: Record<string, React.ElementType> = {
+  LayoutGrid, Sparkles, Package, Smile, PawPrint, TreePine, Sprout, Star, Heart, Gift, Moon, Sun, Flower, Palette, Brush, Wand2,
+  Dog, Cat, Rabbit, Bird, Fish, Bug, Leaf, 
+  Apple, Carrot, Cake, Coffee,
+  Car, Plane, Rocket, Music, Guitar,
+  Gamepad, Trophy, Crown, Diamond,
+  Book, Camera, HomeIcon, Zap, Flame, Snowflake, Cloud,
+  Church, Cross, Droplet, Waves, HandHeart,
+  Baby, Footprints, PiggyBank, Coins, Feather, Hexagon, Circle, Box, Lamp, Eye, Ghost, Shell, Bone, Anchor, Bell
+};
 
 export function Home() {
   const [activeCategory, setActiveCategory] = useState('Todos');
   const [figures, setFigures] = useState<Figure[]>([]);
+  const [categories, setCategories] = useState<CatData[]>([
+    { name: 'Todos', iconName: 'LayoutGrid' },
+    { name: 'Nuevos', iconName: 'Sparkles' }
+  ]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchFigures = async () => {
+    const fetchData = async () => {
       try {
+        // Fetch categories
+        const catSnap = await getDocs(collection(db, 'categories'));
+        const catData = catSnap.docs.map(doc => ({
+          name: doc.data().name,
+          imageUrl: doc.data().imageUrl,
+          iconName: doc.data().iconName
+        }));
+        setCategories([{ name: 'Todos', iconName: 'LayoutGrid' }, { name: 'Nuevos', iconName: 'Sparkles' }, ...catData]);
+
+        // Fetch figures
         const q = query(collection(db, 'figures'), orderBy('createdAt', 'desc'));
         const snapshot = await getDocs(q);
         const data = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         })) as Figure[];
+        
         setFigures([...data, ...MOCK_FIGURES]);
       } catch (error) {
-        console.error('Error fetching figures:', error);
+        console.error('Error fetching data:', error);
         setFigures(MOCK_FIGURES); // Fallback to mock on error
       } finally {
         setLoading(false);
       }
     };
-    fetchFigures();
+    fetchData();
   }, []);
 
   const filteredFigures = figures.filter(figure => {
@@ -39,8 +78,18 @@ export function Home() {
     return figure.category === activeCategory;
   });
 
-  const renderCategoryIcon = (cat: string) => {
-    switch (cat) {
+  const renderCategoryIcon = (cat: CatData) => {
+    if (cat.imageUrl) {
+      return <img src={cat.imageUrl} alt={cat.name} className="w-10 h-10 object-cover rounded-full mix-blend-multiply" />;
+    }
+    
+    if (cat.iconName && ICON_MAP[cat.iconName]) {
+      const Icon = ICON_MAP[cat.iconName];
+      return <Icon size={28} strokeWidth={1.5} />;
+    }
+
+    // Fallbacks para datos legacy
+    switch (cat.name) {
       case 'Todos': return <LayoutGrid size={28} strokeWidth={1.5} />;
       case 'Nuevos': return <Sparkles size={28} strokeWidth={1.5} />;
       case 'Combos': return <Package size={28} strokeWidth={1.5} />;
@@ -75,17 +124,17 @@ export function Home() {
       {/* Burbujas de Categorías */}
       <div className="mb-8">
         <div className="flex overflow-x-auto pb-4 pt-2 -mx-4 px-4 sm:mx-0 sm:px-0 gap-3 hide-scrollbar snap-x">
-          {CATEGORIES.map(cat => (
+          {categories.map(cat => (
             <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`snap-start flex flex-col items-center gap-2 min-w-[72px] transition-transform active:scale-95 ${activeCategory === cat ? 'opacity-100' : 'opacity-70 hover:opacity-100 text-gray-500 hover:text-abu-brown'}`}
+              key={cat.name}
+              onClick={() => setActiveCategory(cat.name)}
+              className={`snap-start flex flex-col items-center gap-2 min-w-[72px] transition-transform active:scale-95 ${activeCategory === cat.name ? 'opacity-100' : 'opacity-70 hover:opacity-100 text-gray-500 hover:text-abu-brown'}`}
             >
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center shadow-sm border-2 transition-colors ${activeCategory === cat ? 'border-abu-accent bg-abu-cream text-abu-brown' : 'border-gray-200 bg-white text-gray-400'}`}>
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center shadow-sm border-2 transition-colors ${activeCategory === cat.name ? 'border-abu-accent bg-abu-cream text-abu-brown' : 'border-gray-200 bg-white text-gray-400'}`}>
                 {renderCategoryIcon(cat)}
               </div>
-              <span className={`text-[11px] font-bold text-center ${activeCategory === cat ? 'text-abu-brown' : 'text-gray-500'}`}>
-                {cat}
+              <span className={`text-[11px] font-bold text-center ${activeCategory === cat.name ? 'text-abu-brown' : 'text-gray-500'}`}>
+                {cat.name}
               </span>
             </button>
           ))}

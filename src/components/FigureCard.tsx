@@ -1,7 +1,10 @@
 import type { Figure } from '../types';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Share2 } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
+import { useToastStore } from '../store/toastStore';
 import { Link } from 'react-router-dom';
+import { handleShare } from '../utils/shareUtils';
+import { createSlug } from '../utils/slug';
 
 interface FigureCardProps {
   figure: Figure;
@@ -23,18 +26,37 @@ export function FigureCard({ figure }: FigureCardProps) {
   };
 
   const badge = figure.badge ? badgeConfig[figure.badge] : null;
+  const productSlug = createSlug(figure.name, figure.id);
+
+  const onShare = (e: React.MouseEvent) => {
+    e.preventDefault(); // Para evitar que el Link se dispare
+    handleShare({
+      title: `AbuOso Artesanías - ${figure.name}`,
+      text: `¡Mirá esta figura: ${figure.name} a solo $${figure.price}!`,
+      url: `${window.location.origin}/producto/${productSlug}`
+    });
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-sm hover:shadow-md overflow-hidden border border-abu-cream transition-all hover:-translate-y-1 flex flex-col relative group">
       
-      {/* Badge de estado */}
+      {/* Botón de Compartir */}
+      <button 
+        onClick={onShare}
+        className="absolute top-2 left-2 z-20 bg-white/80 backdrop-blur-sm p-1.5 rounded-full text-gray-600 hover:text-abu-accent hover:bg-white shadow-sm transition-all active:scale-95"
+        title="Compartir"
+      >
+        <Share2 size={16} />
+      </button>
+
+      {/* Badge de estado (Cinta diagonal) */}
       {badge && (
-        <div className={`absolute top-2 left-2 z-10 ${badge.color} text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-sm uppercase tracking-wide`}>
+        <div className={`absolute top-4 -right-9 z-10 ${badge.color} text-white text-[10px] font-bold py-1 shadow-md uppercase tracking-wide transform rotate-45 text-center w-[130px]`}>
           {badge.text}
         </div>
       )}
 
-      <Link to={`/producto/${figure.id}`} className="block aspect-square w-full overflow-hidden bg-abu-cream/30 relative">
+      <Link to={`/producto/${productSlug}`} className="block aspect-square w-full overflow-hidden bg-abu-cream/30 relative z-0">
         <img 
           src={figure.imageUrl} 
           alt={figure.name} 
@@ -62,7 +84,10 @@ export function FigureCard({ figure }: FigureCardProps) {
           {/* Botón Carrito */}
           <button 
             disabled={figure.badge === 'agotado'}
-            onClick={() => addItem(figure)}
+            onClick={() => {
+              addItem(figure);
+              useToastStore.getState().addToast(`¡${figure.name} agregado al carrito!`, 'success');
+            }}
             className="w-full bg-abu-light hover:bg-abu-cream text-abu-brown border border-abu-cream font-medium py-1.5 rounded-lg text-xs transition-colors active:scale-95 flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:active:scale-100"
             title="Agregar al carrito"
           >
