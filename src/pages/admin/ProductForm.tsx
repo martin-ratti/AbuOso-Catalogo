@@ -122,7 +122,7 @@ export function ProductForm() {
     setIsSubmitting(true);
 
     try {
-      const docData: any = {
+      const docData: Record<string, unknown> = {
         name,
         description,
         price: Number(price),

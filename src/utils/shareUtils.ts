@@ -13,8 +13,8 @@ export const handleShare = async (data: ShareData) => {
     try {
       await navigator.share(data);
       // El navegador maneja el éxito silenciosamente o el usuario puede cancelar
-    } catch (error: any) {
-      if (error.name !== 'AbortError') {
+    } catch (error) {
+      if (error instanceof Error && error.name !== 'AbortError') {
         // Fallback si falla por algo que no sea que el usuario cerró el modal
         copyToClipboard(data.url, addToast);
       }
