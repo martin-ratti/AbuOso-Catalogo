@@ -56,7 +56,7 @@ export function FigureCard({ figure }: FigureCardProps) {
 
       {/* Badge de estado (Cinta diagonal) */}
       {badge && (
-        <div className={`absolute top-4 -right-9 z-10 ${badge.color} text-white text-[10px] font-bold py-1 shadow-md uppercase tracking-wide transform rotate-45 text-center w-[130px]`}>
+        <div className={`absolute top-4 -right-9 z-10 ${badge.color} text-white text-[10px] font-bold py-1 shadow-md uppercase tracking-wide transform rotate-45 text-center w-32.5`}>
           {badge.text}
         </div>
       )}

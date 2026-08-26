@@ -98,7 +98,7 @@ export function Dashboard() {
       />
 
       {/* Hero Banner */}
-      <div className="bg-gradient-to-br from-abu-brown to-abu-dark rounded-3xl p-8 sm:p-10 text-white shadow-lg relative overflow-hidden">
+      <div className="bg-linear-to-br from-abu-brown to-abu-dark rounded-3xl p-8 sm:p-10 text-white shadow-lg relative overflow-hidden">
         <div className="relative z-10">
           <h2 className="text-3xl sm:text-4xl font-bold mb-2">¡Hola, {userName}! 👋</h2>
           <p className="text-abu-cream text-lg max-w-xl opacity-90">
