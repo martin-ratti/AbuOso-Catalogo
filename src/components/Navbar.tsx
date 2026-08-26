@@ -3,8 +3,6 @@ import { Menu, Search, X, ShoppingBag, Home, Phone, XCircle, Plus, Minus, Send }
 import { useCartStore } from '../store/cartStore';
 
 export function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
   // Extraer estado del carrito
   const { isCartOpen, toggleCart, items, getCartCount, getCartTotal, updateQuantity, removeItem } = useCartStore();
 
@@ -25,24 +23,16 @@ export function Navbar() {
       <header className="bg-white shadow-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
           
-          {/* Logo y Hamburger */}
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => setIsMenuOpen(true)}
-              className="p-1.5 sm:hidden text-abu-brown hover:bg-abu-cream rounded-md transition-colors"
-            >
-              <Menu size={24} />
-            </button>
-            <div className="flex items-center gap-2">
-              <img 
-                src="/logo.jpg" 
-                alt="AbuOso Logo" 
-                className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover border-2 border-abu-cream shadow-sm" 
-              />
-              <h1 className="font-bold text-lg sm:text-xl text-abu-brown tracking-tight hidden min-[400px]:block">
-                AbuOso <span className="font-medium text-abu-accent hidden sm:inline">Artesanías</span>
-              </h1>
-            </div>
+          {/* Logo */}
+          <div className="flex items-center gap-2">
+            <img 
+              src="/logo.jpg" 
+              alt="AbuOso Logo" 
+              className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover border-2 border-abu-cream shadow-sm" 
+            />
+            <h1 className="font-bold text-lg sm:text-xl text-abu-brown tracking-tight">
+              AbuOso <span className="font-medium text-abu-accent hidden sm:inline">Artesanías</span>
+            </h1>
           </div>
           
           {/* Barra de búsqueda (Desktop) */}
@@ -56,11 +46,6 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-6">
-            <nav className="hidden sm:flex gap-4 lg:gap-6 text-abu-brown font-medium text-sm">
-              <a href="#" className="hover:text-abu-accent transition-colors">Catálogo</a>
-              <a href="#" className="hover:text-abu-accent transition-colors">Contacto</a>
-            </nav>
-            
             {/* Botón Carrito Global */}
             <button 
               onClick={toggleCart}
@@ -76,46 +61,6 @@ export function Navbar() {
           </div>
         </div>
       </header>
-
-      {/* Overlay Oscuro para el menú principal */}
-      {isMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-50 sm:hidden transition-opacity"
-          onClick={() => setIsMenuOpen(false)}
-        />
-      )}
-
-      {/* Sidebar Móvil (Navegación) */}
-      <div className={`fixed top-0 left-0 bottom-0 w-[280px] bg-white z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="p-4 flex items-center justify-between border-b border-abu-cream">
-          <div className="flex items-center gap-2">
-            <img src="/logo.jpg" alt="Logo" className="w-8 h-8 rounded-full border border-abu-cream" />
-            <h2 className="font-bold text-lg text-abu-brown">Menú</h2>
-          </div>
-          <button onClick={() => setIsMenuOpen(false)} className="p-1 text-gray-500 hover:text-abu-brown bg-abu-light rounded-full">
-            <X size={20} />
-          </button>
-        </div>
-        
-        <div className="p-4 flex-1 overflow-y-auto">
-          {/* Búsqueda en móvil */}
-          <div className="relative mb-6">
-            <input 
-              type="text" 
-              placeholder="Buscar..." 
-              className="w-full bg-abu-light border border-abu-cream rounded-xl py-2.5 pl-3 pr-10 text-sm focus:outline-none focus:border-abu-accent"
-            />
-            <Search size={16} className="absolute right-3 top-3 text-gray-400" />
-          </div>
-
-          <div className="mt-4 pt-4 border-t border-abu-cream">
-             <ul className="flex flex-col gap-4 text-gray-600 text-sm">
-              <li><a href="#" className="flex items-center gap-2 hover:text-abu-brown"><Home size={16} /> Inicio</a></li>
-              <li><a href="#" className="flex items-center gap-2 hover:text-abu-brown"><Phone size={16} /> Contacto</a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
 
       {/* Overlay Oscuro para el carrito */}
       {isCartOpen && (
