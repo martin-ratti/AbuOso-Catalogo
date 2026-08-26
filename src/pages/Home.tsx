@@ -1,14 +1,39 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FigureCard } from '../components/FigureCard';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { db } from '../firebase';
+import type { Figure } from '../types';
 import { MOCK_FIGURES } from '../data/mock';
-import { LayoutGrid, Sparkles, Package, Smile, PawPrint, Sprout, TreePine } from 'lucide-react';
+import { LayoutGrid, Sparkles, Package, Smile, PawPrint, Sprout, TreePine, Loader2 } from 'lucide-react';
 
 const CATEGORIES = ['Todos', 'Nuevos', 'Combos', 'Ositos', 'Animalitos', 'Macetas', 'Navideñas'];
 
 export function Home() {
   const [activeCategory, setActiveCategory] = useState('Todos');
+  const [figures, setFigures] = useState<Figure[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredFigures = MOCK_FIGURES.filter(figure => {
+  useEffect(() => {
+    const fetchFigures = async () => {
+      try {
+        const q = query(collection(db, 'figures'), orderBy('createdAt', 'desc'));
+        const snapshot = await getDocs(q);
+        const data = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Figure[];
+        setFigures([...data, ...MOCK_FIGURES]);
+      } catch (error) {
+        console.error('Error fetching figures:', error);
+        setFigures(MOCK_FIGURES); // Fallback to mock on error
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFigures();
+  }, []);
+
+  const filteredFigures = figures.filter(figure => {
     if (activeCategory === 'Todos') return true;
     if (activeCategory === 'Nuevos') return figure.badge === 'novedad';
     return figure.category === activeCategory;
@@ -75,7 +100,11 @@ export function Home() {
       </div>
 
       {/* Grilla responsiva */}
-      {filteredFigures.length > 0 ? (
+      {loading ? (
+        <div className="flex justify-center py-12">
+          <Loader2 size={32} className="animate-spin text-abu-accent" />
+        </div>
+      ) : filteredFigures.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 lg:gap-5">
           {filteredFigures.map(figure => (
             <FigureCard key={figure.id} figure={figure} />

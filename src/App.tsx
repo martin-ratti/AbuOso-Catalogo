@@ -5,6 +5,7 @@ import { ProductDetail } from './pages/ProductDetail';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/admin/Dashboard';
 import { ProductForm } from './pages/admin/ProductForm';
+import { ToastContainer } from './components/ToastContainer';
 import { Lock } from 'lucide-react';
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
     <BrowserRouter>
       <div className="min-h-screen bg-abu-light flex flex-col font-sans">
         <Navbar />
+        <ToastContainer />
         
         <Routes>
           <Route path="/" element={<Home />} />

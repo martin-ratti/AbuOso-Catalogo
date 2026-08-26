@@ -1,12 +1,52 @@
 import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase';
+import type { Figure } from '../types';
 import { MOCK_FIGURES } from '../data/mock';
-import { ArrowLeft, ShoppingCart, MessageCircleHeart } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Loader2 } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 
 export function ProductDetail() {
   const { id } = useParams();
-  const figure = MOCK_FIGURES.find(f => f.id === id);
+  const [figure, setFigure] = useState<Figure | null>(null);
+  const [loading, setLoading] = useState(true);
   const addItem = useCartStore((state) => state.addItem);
+
+  useEffect(() => {
+    const fetchFigure = async () => {
+      if (!id) return;
+      
+      // Check in mock data first
+      const mockFigure = MOCK_FIGURES.find(f => f.id === id);
+      if (mockFigure) {
+        setFigure(mockFigure);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const docRef = doc(db, 'figures', id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setFigure({ id: docSnap.id, ...docSnap.data() } as Figure);
+        }
+      } catch (error) {
+        console.error('Error fetching figure:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFigure();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center py-20">
+        <Loader2 size={40} className="animate-spin text-abu-accent" />
+      </div>
+    );
+  }
 
   if (!figure) {
     return (

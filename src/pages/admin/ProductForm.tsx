@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuthStore } from '../../store/authStore';
+import { useToastStore } from '../../store/toastStore';
 import { Navigate, Link, useNavigate } from 'react-router-dom';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
@@ -16,6 +17,7 @@ const BADGES = [
 
 export function ProductForm() {
   const { user, loading } = useAuthStore();
+  const addToast = useToastStore((state) => state.addToast);
   const navigate = useNavigate();
   
   const [name, setName] = useState('');
@@ -83,7 +85,7 @@ export function ProductForm() {
     setError('');
 
     try {
-      // 2. Guardar datos en Firestore directamente (la imagen ya está comprimida en Base64)
+      // 2. Guardar datos en Firestore directamente
       const docData = {
         name,
         description,
@@ -96,12 +98,12 @@ export function ProductForm() {
 
       await addDoc(collection(db, 'figures'), docData);
       
-      alert('¡Figura creada exitosamente!');
+      addToast('¡Figura creada exitosamente!', 'success');
       navigate('/admin/dashboard');
 
     } catch (err: any) {
       console.error(err);
-      setError('Hubo un error al guardar la figura. Intenta de nuevo.');
+      setError(`Error al guardar: ${err.message || 'Intenta de nuevo.'}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -196,12 +198,18 @@ export function ProductForm() {
                 onChange={handleImageChange}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               />
-              <div className="flex flex-col items-center gap-2 text-gray-500 group-hover:text-abu-accent transition-colors">
-                <Upload size={32} />
-                <span className="text-sm font-medium">
-                  {fileName ? fileName : 'Toca para subir una imagen'}
-                </span>
-              </div>
+              
+              {imageBase64 ? (
+                <div className="flex flex-col items-center gap-2">
+                  <img src={imageBase64} alt="Vista previa" className="w-32 h-32 object-cover rounded-xl shadow-sm" />
+                  <span className="text-sm font-medium text-abu-accent">{fileName} (Toca para cambiar)</span>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-2 text-gray-500 group-hover:text-abu-accent transition-colors">
+                  <Upload size={32} />
+                  <span className="text-sm font-medium">Toca para subir una imagen</span>
+                </div>
+              )}
             </div>
           </div>
 
