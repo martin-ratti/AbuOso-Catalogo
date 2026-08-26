@@ -27,10 +27,10 @@ function App() {
           {/* Botón oculto para admin */}
           <Link 
             to="/admin" 
-            className="absolute bottom-4 right-4 text-abu-brown hover:text-abu-cream transition-colors opacity-30 hover:opacity-100"
+            className="absolute bottom-4 right-4 text-abu-cream/50 hover:text-white transition-colors"
             title="Administración"
           >
-            <Lock size={14} />
+            <Lock size={16} />
           </Link>
         </footer>
       </div>
