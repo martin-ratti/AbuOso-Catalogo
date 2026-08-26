@@ -2,6 +2,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { Search, X, ShoppingBag, Plus, Minus, Send, XCircle, ArrowLeft } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { useSearchStore } from '../store/searchStore';
+import { useCatalogStore } from '../store/catalogStore';
+import { createSlug } from '../utils/slug';
 import { APP_CONFIG } from '../config/constants';
 
 export function Navbar() {
@@ -59,6 +61,36 @@ export function Navbar() {
                 </button>
               ) : (
                 <Search size={16} className="absolute right-3 top-2.5 text-gray-400" />
+              )}
+              
+              {/* Dropdown de Autocompletado */}
+              {searchQuery.length >= 3 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-abu-cream overflow-hidden z-50 max-h-[300px] overflow-y-auto">
+                  {(() => {
+                    const { figures } = useCatalogStore.getState();
+                    const query = searchQuery.toLowerCase().trim();
+                    const results = figures.filter(f => f.name.toLowerCase().includes(query)).slice(0, 5);
+                    
+                    if (results.length === 0) {
+                      return <div className="p-4 text-center text-sm text-gray-500">No se encontraron figuras.</div>;
+                    }
+                    
+                    return results.map(figure => (
+                      <Link 
+                        key={figure.id} 
+                        to={`/producto/${createSlug(figure.name, figure.id)}`}
+                        onClick={() => setSearchQuery('')}
+                        className="flex items-center gap-3 p-3 hover:bg-abu-light transition-colors border-b border-gray-50 last:border-0"
+                      >
+                        <img src={figure.imageUrl} alt={figure.name} className="w-12 h-12 rounded-xl object-cover bg-abu-cream" />
+                        <div>
+                          <p className="font-bold text-sm text-abu-brown">{figure.name}</p>
+                          <p className="text-xs font-medium text-abu-accent">${figure.price}</p>
+                        </div>
+                      </Link>
+                    ));
+                  })()}
+                </div>
               )}
             </div>
           )}

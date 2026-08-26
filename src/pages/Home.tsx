@@ -30,7 +30,7 @@ export function Home() {
   
   // Custom hooks
   const { categories, loadingCats } = useCategories();
-  const { figures, loading, loadingMore, hasMore, error, loadMore } = useCatalog(activeCategory);
+  const { figures, loading, hasMore, error, loadMore } = useCatalog(activeCategory);
 
   return (
     <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-8">
@@ -117,14 +117,9 @@ export function Home() {
             <div className="flex justify-center mt-8">
               <button 
                 onClick={loadMore}
-                disabled={loadingMore}
-                className="bg-white hover:bg-abu-light text-abu-brown border-2 border-abu-cream font-bold py-3 px-8 rounded-full transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                className="bg-white hover:bg-abu-light text-abu-brown border-2 border-abu-cream font-bold py-3 px-8 rounded-full transition-all active:scale-95 flex items-center gap-2 shadow-sm"
               >
-                {loadingMore ? (
-                  <><Loader2 size={18} className="animate-spin" /> Cargando...</>
-                ) : (
-                  'Ver más figuras'
-                )}
+                Ver más figuras
               </button>
             </div>
           )}
