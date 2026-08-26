@@ -25,6 +25,7 @@ export function Navbar() {
   };
 
   const isHome = location.pathname === '/';
+  const isAdmin = location.pathname.startsWith('/admin');
 
   return (
     <>
@@ -96,26 +97,28 @@ export function Navbar() {
             </div>
           )}
 
-          <div className="flex items-center gap-2 sm:gap-6">
-            {/* Botón Carrito Global */}
-            <button 
-              onClick={toggleCart}
-              aria-label="Abrir carrito"
-              className="relative p-2 text-abu-brown hover:bg-abu-cream rounded-full transition-colors flex-shrink-0"
-            >
-              <ShoppingBag size={22} aria-hidden="true" />
-              {getCartCount() > 0 && (
-                <span className="absolute top-0 right-0 bg-abu-accent text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
-                  {getCartCount()}
-                </span>
-              )}
-            </button>
-          </div>
+          {!isAdmin && (
+            <div className="flex items-center gap-2 sm:gap-6">
+              {/* Botón Carrito Global */}
+              <button 
+                onClick={toggleCart}
+                aria-label="Abrir carrito"
+                className="relative p-2 text-abu-brown hover:bg-abu-cream rounded-full transition-colors flex-shrink-0"
+              >
+                <ShoppingBag size={22} aria-hidden="true" />
+                {getCartCount() > 0 && (
+                  <span className="absolute top-0 right-0 bg-abu-accent text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+                    {getCartCount()}
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
       {/* Overlay Oscuro para el carrito */}
-      {isCartOpen && (
+      {!isAdmin && isCartOpen && (
         <div 
           className="fixed inset-0 bg-black/40 z-[60] transition-opacity backdrop-blur-sm"
           onClick={toggleCart}
@@ -123,7 +126,8 @@ export function Navbar() {
       )}
 
       {/* Sidebar del Carrito */}
-      <div className={`fixed top-0 right-0 bottom-0 w-full max-w-[380px] bg-white z-[70] shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      {!isAdmin && (
+        <div className={`fixed top-0 right-0 bottom-0 w-full max-w-[380px] bg-white z-[70] shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="p-4 flex items-center justify-between border-b border-abu-cream bg-abu-light">
           <div className="flex items-center gap-2 text-abu-brown">
             <ShoppingBag size={20} aria-hidden="true" />
@@ -196,6 +200,7 @@ export function Navbar() {
           </div>
         )}
       </div>
+      )}
     </>
   );
 }
