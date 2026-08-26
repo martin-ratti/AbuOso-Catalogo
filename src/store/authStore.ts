@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { User, onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { auth } from '../firebase';
 
 interface AuthStore {
