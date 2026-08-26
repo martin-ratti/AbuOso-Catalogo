@@ -3,7 +3,7 @@ import { Navbar } from './components/Navbar';
 import { Home } from './pages/Home';
 import { ProductDetail } from './pages/ProductDetail';
 import { Login } from './pages/Login';
-import { Dashboard } from './pages/Dashboard';
+import { Dashboard } from './pages/admin/Dashboard';
 import { Lock } from 'lucide-react';
 
 function App() {
@@ -17,6 +17,7 @@ function App() {
           <Route path="/producto/:id" element={<ProductDetail />} />
           <Route path="/admin" element={<Login />} />
           <Route path="/admin/dashboard" element={<Dashboard />} />
+          {/* Faltarían las rutas de ProductList, ProductForm, etc. las creamos en breve */}
         </Routes>
 
         <footer className="bg-abu-brown text-abu-cream py-8 text-center mt-auto relative">
