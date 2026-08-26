@@ -26,7 +26,7 @@ export function Login() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       navigate('/admin/dashboard');
-    } catch (err: any) {
+    } catch {
       setError('Credenciales incorrectas. Intenta de nuevo.');
     } finally {
       setIsLoading(false);

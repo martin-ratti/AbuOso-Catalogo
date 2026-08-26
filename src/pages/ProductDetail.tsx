@@ -132,10 +132,11 @@ export function ProductDetail() {
           
           <button 
             onClick={onShare}
-            className="absolute top-6 right-6 p-2 bg-abu-light text-gray-500 hover:text-abu-accent hover:bg-abu-cream rounded-full transition-colors"
+            aria-label={`Compartir ${figure.name}`}
+            className="absolute top-6 right-6 p-2 text-gray-500 hover:text-abu-accent hover:bg-abu-light rounded-full transition-colors active:scale-95"
             title="Compartir producto"
           >
-            <Share2 size={20} />
+            <Share2 size={22} aria-hidden="true" />
           </button>
 
           {figure.badge && (

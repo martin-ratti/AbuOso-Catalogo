@@ -55,11 +55,11 @@ export function ProductForm() {
             setCategory(data.category);
             setBadge(data.badge || '');
             setImageBase64(data.imageUrl);
-          } else {
+            } else {
             addToast('Figura no encontrada', 'error');
             navigate('/admin/products');
           }
-        } catch (error) {
+        } catch {
           addToast('Error al cargar la figura', 'error');
         } finally {
           setIsFetchingItem(false);
@@ -69,7 +69,7 @@ export function ProductForm() {
       }
     };
     fetchInitialData();
-  }, [id, isEditing]);
+  }, [id, isEditing, addToast, navigate]);
 
   if (loading) return <div className="flex-1 flex items-center justify-center">Cargando...</div>;
   if (!user) return <Navigate to="/admin" replace />;
@@ -132,7 +132,7 @@ export function ProductForm() {
       };
 
       if (isEditing) {
-        await updateDoc(doc(db, 'figures', id), docData);
+        await updateDoc(doc(db, 'figures', id!), docData);
         addToast('¡Figura actualizada exitosamente!', 'success');
       } else {
         docData.createdAt = new Date();
@@ -142,9 +142,8 @@ export function ProductForm() {
       
       navigate('/admin/products');
 
-    } catch (err: any) {
-      console.error(err);
-      addToast(`Error al guardar: ${err.message || 'Intenta de nuevo.'}`, 'error');
+    } catch {
+      addToast('Error al guardar. Intenta de nuevo.', 'error');
     } finally {
       setIsSubmitting(false);
     }

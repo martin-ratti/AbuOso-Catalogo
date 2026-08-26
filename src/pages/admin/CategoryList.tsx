@@ -14,20 +14,21 @@ export function CategoryList() {
   // Estado para el modal de confirmación
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
-  const fetchCategories = async () => {
-    setLoading(true);
-    try {
-      const snapshot = await getDocs(collection(db, 'categories'));
-      const data = snapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
-      setCategories(data);
-    } catch (e) {
-      addToast('Error al cargar categorías', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { fetchCategories(); }, []);
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setLoading(true);
+      try {
+        const snapshot = await getDocs(collection(db, 'categories'));
+        const data = snapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
+        setCategories(data);
+      } catch {
+        addToast('Error al cargar categorías', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategories();
+  }, [addToast]);
 
   const handleDeleteConfirm = async () => {
     if (!itemToDelete) return;
@@ -35,7 +36,7 @@ export function CategoryList() {
       await deleteDoc(doc(db, 'categories', itemToDelete));
       addToast('Categoría eliminada', 'success');
       setCategories(categories.filter(c => c.id !== itemToDelete));
-    } catch (e) {
+    } catch {
       addToast('Error al eliminar', 'error');
     }
     setItemToDelete(null);

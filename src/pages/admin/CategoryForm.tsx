@@ -100,7 +100,7 @@ export function CategoryForm() {
       });
       addToast('Categoría creada exitosamente', 'success');
       navigate('/admin/categories');
-    } catch (error) {
+    } catch {
       addToast('Error al crear categoría', 'error');
     } finally {
       setIsSubmitting(false);

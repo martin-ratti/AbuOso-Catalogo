@@ -14,20 +14,21 @@ export function ProductList() {
   
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
-  const fetchFigures = async () => {
-    setLoading(true);
-    try {
-      const snapshot = await getDocs(collection(db, 'figures'));
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Figure));
-      setFigures(data);
-    } catch (e) {
-      addToast('Error al cargar productos', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { fetchFigures(); }, []);
+  useEffect(() => {
+    const fetchFigures = async () => {
+      setLoading(true);
+      try {
+        const snapshot = await getDocs(collection(db, 'figures'));
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Figure));
+        setFigures(data);
+      } catch {
+        addToast('Error al cargar productos', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFigures();
+  }, [addToast]);
 
   const handleDeleteConfirm = async () => {
     if (!itemToDelete) return;
@@ -35,7 +36,7 @@ export function ProductList() {
       await deleteDoc(doc(db, 'figures', itemToDelete));
       addToast('Producto eliminado', 'success');
       setFigures(figures.filter(f => f.id !== itemToDelete));
-    } catch (e) {
+    } catch {
       addToast('Error al eliminar', 'error');
     }
     setItemToDelete(null);

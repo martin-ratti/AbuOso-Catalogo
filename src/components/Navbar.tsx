@@ -49,9 +49,10 @@ export function Navbar() {
             {/* Botón Carrito Global */}
             <button 
               onClick={toggleCart}
+              aria-label="Abrir carrito"
               className="relative p-2 text-abu-brown hover:bg-abu-cream rounded-full transition-colors"
             >
-              <ShoppingBag size={22} />
+              <ShoppingBag size={22} aria-hidden="true" />
               {getCartCount() > 0 && (
                 <span className="absolute top-0 right-0 bg-abu-accent text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
                   {getCartCount()}
@@ -74,11 +75,11 @@ export function Navbar() {
       <div className={`fixed top-0 right-0 bottom-0 w-full max-w-[340px] bg-white z-[70] shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="p-4 flex items-center justify-between border-b border-abu-cream bg-abu-light">
           <div className="flex items-center gap-2 text-abu-brown">
-            <ShoppingBag size={20} />
+            <ShoppingBag size={20} aria-hidden="true" />
             <h2 className="font-bold text-lg">Tu Pedido</h2>
           </div>
-          <button onClick={toggleCart} className="p-1 text-gray-500 hover:text-abu-brown bg-white rounded-full border border-gray-200">
-            <X size={20} />
+          <button onClick={toggleCart} aria-label="Cerrar carrito" className="p-1 text-gray-500 hover:text-abu-brown bg-white rounded-full border border-gray-200">
+            <X size={20} aria-hidden="true" />
           </button>
         </div>
         

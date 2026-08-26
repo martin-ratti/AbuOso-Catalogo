@@ -43,10 +43,11 @@ export function FigureCard({ figure }: FigureCardProps) {
       {/* Botón de Compartir */}
       <button 
         onClick={onShare}
+        aria-label={`Compartir ${figure.name}`}
         className="absolute top-2 left-2 z-20 bg-white/80 backdrop-blur-sm p-1.5 rounded-full text-gray-600 hover:text-abu-accent hover:bg-white shadow-sm transition-all active:scale-95"
         title="Compartir"
       >
-        <Share2 size={16} />
+        <Share2 size={16} aria-hidden="true" />
       </button>
 
       {/* Badge de estado (Cinta diagonal) */}
