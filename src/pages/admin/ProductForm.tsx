@@ -4,7 +4,8 @@ import { useToastStore } from '../../store/toastStore';
 import { Navigate, Link, useNavigate, useParams } from 'react-router-dom';
 import { collection, addDoc, getDocs, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { ArrowLeft, Upload, Loader2, Save } from 'lucide-react';
+import { ArrowLeft, Upload, Loader2, Save, ImageIcon } from 'lucide-react';
+import { uploadToCloudinary } from '../../utils/cloudinary';
 
 const BADGES = [
   { value: '', label: 'Sin etiqueta' },
@@ -28,9 +29,10 @@ export function ProductForm() {
   const [badge, setBadge] = useState('');
   const [categories, setCategories] = useState<{id: string, name: string}[]>([]);
   
-  // Almacenamos el Base64 de la imagen o URL existente
-  const [imageBase64, setImageBase64] = useState<string | null>(null);
-  const [fileName, setFileName] = useState('');
+  // Imagen: puede ser una URL (existente) o un File nuevo
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFetchingItem, setIsFetchingItem] = useState(isEditing);
@@ -54,7 +56,8 @@ export function ProductForm() {
             setPrice(data.price.toString());
             setCategory(data.category);
             setBadge(data.badge || '');
-            setImageBase64(data.imageUrl);
+            setImageUrl(data.imageUrl);
+            setImagePreview(data.imageUrl);
             } else {
             addToast('Figura no encontrada', 'error');
             navigate('/admin/products');
@@ -74,47 +77,22 @@ export function ProductForm() {
   if (loading) return <div className="flex-1 flex items-center justify-center">Cargando...</div>;
   if (!user) return <Navigate to="/admin" replace />;
 
-  // Función para comprimir la imagen en el navegador
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setFileName(file.name);
+    setImageFile(file);
+    // Generar preview local
     const reader = new FileReader();
     reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        // Redimensionar si es muy grande (max 800x800)
-        const MAX_SIZE = 800;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height && width > MAX_SIZE) {
-          height *= MAX_SIZE / width;
-          width = MAX_SIZE;
-        } else if (height > MAX_SIZE) {
-          width *= MAX_SIZE / height;
-          height = MAX_SIZE;
-        }
-
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0, width, height);
-
-        // Convertir a WebP con 70% de calidad
-        const compressedBase64 = canvas.toDataURL('image/webp', 0.7);
-        setImageBase64(compressedBase64);
-      };
-      img.src = event.target?.result as string;
+      setImagePreview(event.target?.result as string);
     };
     reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !price || !description || !imageBase64) {
+    if (!name || !price || !description || (!imagePreview && !imageUrl)) {
       addToast('Por favor, completa todos los campos y selecciona una imagen.', 'error');
       return;
     }
@@ -122,13 +100,19 @@ export function ProductForm() {
     setIsSubmitting(true);
 
     try {
+      // Si hay un archivo nuevo, subir a Cloudinary
+      let finalImageUrl = imageUrl;
+      if (imageFile) {
+        finalImageUrl = await uploadToCloudinary(imageFile);
+      }
+
       const docData: Record<string, unknown> = {
         name,
         description,
         price: Number(price),
         category,
         badge: badge || null,
-        imageUrl: imageBase64
+        imageUrl: finalImageUrl
       };
 
       if (isEditing) {
@@ -240,10 +224,12 @@ export function ProductForm() {
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               />
               
-              {imageBase64 ? (
+              {imagePreview ? (
                 <div className="flex flex-col items-center gap-2">
-                  <img src={imageBase64} alt="Vista previa" className="w-32 h-32 object-cover rounded-xl shadow-sm" />
-                  <span className="text-sm font-medium text-abu-accent">{fileName} (Toca para cambiar)</span>
+                  <img src={imagePreview} alt="Vista previa" className="w-32 h-32 object-cover rounded-xl shadow-sm" />
+                  <span className="text-sm font-medium text-abu-accent flex items-center gap-1">
+                    <ImageIcon size={14} /> {imageFile ? imageFile.name : 'Toca para cambiar'}
+                  </span>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-2 text-gray-500 group-hover:text-abu-accent transition-colors">
@@ -258,10 +244,10 @@ export function ProductForm() {
             <button 
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
-                <><Loader2 size={20} className="animate-spin" /> {isEditing ? 'Actualizando...' : 'Guardando y subiendo foto...'}</>
+                <><Loader2 size={20} className="animate-spin" /> {isEditing ? 'Actualizando...' : 'Subiendo imagen y guardando...'}</>
               ) : (
                 <><Save size={20} /> {isEditing ? 'Guardar Cambios' : 'Guardar Producto'}</>
               )}

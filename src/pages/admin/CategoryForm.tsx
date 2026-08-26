@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { collection, addDoc } from 'firebase/firestore';
+import { useState, useEffect } from 'react';
+import { collection, addDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, Loader2, Search,
   Smile, PawPrint, TreePine, Sprout, Package, Sparkles, Star, Heart, Gift, Moon, Sun, Flower, Palette, Brush, Wand2, LayoutGrid,
   Dog, Cat, Rabbit, Bird, Fish, Bug, Leaf, 
@@ -81,12 +81,40 @@ const AVAILABLE_ICONS = [
 ];
 
 export function CategoryForm() {
+  const { id } = useParams<{ id: string }>();
+  const isEditing = !!id;
+
   const [name, setName] = useState('');
   const [iconName, setIconName] = useState('LayoutGrid');
   const [searchTerm, setSearchTerm] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFetching, setIsFetching] = useState(isEditing);
   const addToast = useToastStore(s => s.addToast);
   const navigate = useNavigate();
+
+  // Si estamos editando, traer datos de la categoría
+  useEffect(() => {
+    if (!isEditing) return;
+    const fetchCategory = async () => {
+      try {
+        const docRef = doc(db, 'categories', id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setName(data.name || '');
+          setIconName(data.iconName || 'LayoutGrid');
+        } else {
+          addToast('Categoría no encontrada', 'error');
+          navigate('/admin/categories');
+        }
+      } catch {
+        addToast('Error al cargar la categoría', 'error');
+      } finally {
+        setIsFetching(false);
+      }
+    };
+    fetchCategory();
+  }, [id, isEditing, addToast, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,14 +122,21 @@ export function CategoryForm() {
 
     setIsSubmitting(true);
     try {
-      await addDoc(collection(db, 'categories'), { 
+      const docData = { 
         name: name.trim(),
         iconName: iconName
-      });
-      addToast('Categoría creada exitosamente', 'success');
+      };
+
+      if (isEditing) {
+        await updateDoc(doc(db, 'categories', id!), docData);
+        addToast('Categoría actualizada exitosamente', 'success');
+      } else {
+        await addDoc(collection(db, 'categories'), docData);
+        addToast('Categoría creada exitosamente', 'success');
+      }
       navigate('/admin/categories');
     } catch {
-      addToast('Error al crear categoría', 'error');
+      addToast('Error al guardar categoría', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -112,16 +147,22 @@ export function CategoryForm() {
     icon.es.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  if (isFetching) {
+    return <div className="flex-1 flex items-center justify-center"><Loader2 className="animate-spin text-abu-accent" size={40} /></div>;
+  }
+
   return (
     <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8 flex flex-col">
       <div className="mb-6">
-        <Link to="/admin/dashboard" className="text-abu-brown hover:text-abu-accent flex items-center gap-2 font-medium w-fit">
-          <ArrowLeft size={18} /> Volver al panel
+        <Link to="/admin/categories" className="text-abu-brown hover:text-abu-accent flex items-center gap-2 font-medium w-fit">
+          <ArrowLeft size={18} /> Volver a categorías
         </Link>
       </div>
 
       <div className="bg-white rounded-3xl shadow-sm border border-abu-cream p-6 sm:p-8">
-        <h2 className="text-2xl font-bold text-abu-brown mb-6">Nueva Categoría</h2>
+        <h2 className="text-2xl font-bold text-abu-brown mb-6">
+          {isEditing ? 'Editar Categoría' : 'Nueva Categoría'}
+        </h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">Nombre de la categoría</label>
@@ -176,9 +217,9 @@ export function CategoryForm() {
           <button 
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3.5 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2 mt-4"
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3.5 rounded-xl transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 mt-4"
           >
-            {isSubmitting ? <><Loader2 className="animate-spin" size={20} /> Guardando...</> : <><Save size={20} /> Guardar Categoría</>}
+            {isSubmitting ? <><Loader2 className="animate-spin" size={20} /> Guardando...</> : <><Save size={20} /> {isEditing ? 'Guardar Cambios' : 'Guardar Categoría'}</>}
           </button>
         </form>
       </div>

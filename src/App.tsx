@@ -42,6 +42,7 @@ function App() {
           <Route path="/admin/products/edit/:id" element={<Suspense fallback={<AdminFallback />}><ProductForm /></Suspense>} />
           <Route path="/admin/categories" element={<Suspense fallback={<AdminFallback />}><CategoryList /></Suspense>} />
           <Route path="/admin/categories/new" element={<Suspense fallback={<AdminFallback />}><CategoryForm /></Suspense>} />
+          <Route path="/admin/categories/edit/:id" element={<Suspense fallback={<AdminFallback />}><CategoryForm /></Suspense>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
 

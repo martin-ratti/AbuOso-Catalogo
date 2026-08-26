@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { collection, onSnapshot, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Trash2, Plus, Loader2, Tags } from 'lucide-react';
+import { ArrowLeft, Trash2, Edit, Plus, Loader2, Tags } from 'lucide-react';
 import { useToastStore } from '../../store/toastStore';
 import { ConfirmModal } from '../../components/ConfirmModal';
 
@@ -73,9 +73,14 @@ export function CategoryList() {
             {categories.map(cat => (
               <div key={cat.id} className="py-4 flex items-center justify-between gap-4">
                 <span className="font-bold text-abu-dark text-lg">{cat.name}</span>
-                <button onClick={() => setItemToDelete(cat.id)} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
-                  <Trash2 size={20} />
-                </button>
+                <div className="flex items-center gap-1">
+                  <Link to={`/admin/categories/edit/${cat.id}`} className="p-2 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors">
+                    <Edit size={20} />
+                  </Link>
+                  <button onClick={() => setItemToDelete(cat.id)} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
+                    <Trash2 size={20} />
+                  </button>
+                </div>
               </div>
             ))}
             {categories.length === 0 && <p className="text-gray-500 py-4 text-center">No hay categorías dinámicas. Ve a crear una.</p>}
