@@ -8,6 +8,7 @@ import { ProductForm } from './pages/admin/ProductForm';
 import { ProductList } from './pages/admin/ProductList';
 import { CategoryList } from './pages/admin/CategoryList';
 import { CategoryForm } from './pages/admin/CategoryForm';
+import { NotFound } from './pages/NotFound';
 import { ToastContainer } from './components/ToastContainer';
 import { Lock } from 'lucide-react';
 
@@ -28,6 +29,7 @@ function App() {
           <Route path="/admin/products/edit/:id" element={<ProductForm />} />
           <Route path="/admin/categories" element={<CategoryList />} />
           <Route path="/admin/categories/new" element={<CategoryForm />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
 
         <footer className="bg-abu-brown text-abu-cream py-8 text-center mt-auto relative">

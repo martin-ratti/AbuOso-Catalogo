@@ -3,7 +3,6 @@ import { FigureCard } from '../components/FigureCard';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { Figure } from '../types';
-import { MOCK_FIGURES } from '../data/mock';
 import { 
   Smile, PawPrint, TreePine, Sprout, Package, Sparkles, Star, Heart, Gift, Moon, Sun, Flower, Palette, Brush, Wand2, LayoutGrid,
   Dog, Cat, Rabbit, Bird, Fish, Bug, Leaf, 
@@ -40,10 +39,12 @@ export function Home() {
     { name: 'Nuevos', iconName: 'Sparkles' }
   ]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setError(null);
         // Fetch categories
         const catSnap = await getDocs(collection(db, 'categories'));
         const catData = catSnap.docs.map(doc => ({
@@ -61,10 +62,10 @@ export function Home() {
           ...doc.data()
         })) as Figure[];
         
-        setFigures([...data, ...MOCK_FIGURES]);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        setFigures(MOCK_FIGURES); // Fallback to mock on error
+        setFigures(data);
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Ocurrió un error al cargar el catálogo. Por favor, intenta recargar la página.');
       } finally {
         setLoading(false);
       }
@@ -152,6 +153,11 @@ export function Home() {
       {loading ? (
         <div className="flex justify-center py-12">
           <Loader2 size={32} className="animate-spin text-abu-accent" />
+        </div>
+      ) : error ? (
+        <div className="text-center py-12 bg-white rounded-2xl border border-red-200 bg-red-50">
+          <p className="text-red-500 font-medium mb-4">{error}</p>
+          <button onClick={() => window.location.reload()} className="bg-red-100 text-red-600 px-4 py-2 rounded-xl hover:bg-red-200 transition-colors">Reintentar</button>
         </div>
       ) : filteredFigures.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 lg:gap-5">

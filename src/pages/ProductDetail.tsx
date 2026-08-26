@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { Figure } from '../types';
-import { MOCK_FIGURES } from '../data/mock';
 import { ArrowLeft, ShoppingCart, Loader2, Share2 } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { useToastStore } from '../store/toastStore';
@@ -18,28 +17,25 @@ export function ProductDetail() {
 
   const [figure, setFigure] = useState<Figure | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const addItem = useCartStore((state) => state.addItem);
 
   useEffect(() => {
     const fetchFigure = async () => {
       if (!id) return;
       
-      // Check in mock data first
-      const mockFigure = MOCK_FIGURES.find(f => f.id === id);
-      if (mockFigure) {
-        setFigure(mockFigure);
-        setLoading(false);
-        return;
-      }
-
       try {
+        setError(null);
         const docRef = doc(db, 'figures', id);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           setFigure({ id: docSnap.id, ...docSnap.data() } as Figure);
+        } else {
+          setError('La figura solicitada no existe.');
         }
-      } catch (error) {
-        console.error('Error fetching figure:', error);
+      } catch (err) {
+        console.error('Error fetching figure:', err);
+        setError('Ocurrió un error al cargar la figura.');
       } finally {
         setLoading(false);
       }
@@ -85,12 +81,13 @@ export function ProductDetail() {
     );
   }
 
-  if (!figure) {
+  if (error || !figure) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-        <h2 className="text-2xl font-bold text-abu-brown mb-4">Figura no encontrada</h2>
-        <Link to="/" className="text-abu-accent hover:underline flex items-center gap-2">
-          <ArrowLeft size={16} /> Volver al catálogo
+      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center mt-20">
+        <h2 className="text-3xl font-bold text-abu-brown mb-4">{error || 'Figura no encontrada'}</h2>
+        <p className="text-gray-500 mb-8 max-w-md">Lo sentimos, la figura que estás buscando no existe o hubo un error al cargarla.</p>
+        <Link to="/" className="bg-abu-brown text-white hover:bg-abu-dark px-6 py-3 rounded-xl flex items-center gap-2 transition-colors">
+          <ArrowLeft size={18} /> Volver al catálogo
         </Link>
       </div>
     );
