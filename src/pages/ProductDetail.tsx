@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { Figure } from '../types';
-import { ArrowLeft, ShoppingCart, Loader2, Share2 } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Share2 } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { useToastStore } from '../store/toastStore';
 import { handleShare } from '../utils/shareUtils';

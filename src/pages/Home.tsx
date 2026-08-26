@@ -3,7 +3,6 @@ import { FigureCard } from '../components/FigureCard';
 import { FigureCardSkeleton } from '../components/FigureCardSkeleton';
 import { useCatalog } from '../hooks/useCatalog';
 import { useCategories } from '../hooks/useCategories';
-import { Loader2 } from 'lucide-react';
 import { 
   Smile, PawPrint, TreePine, Sprout, Package, Sparkles, Star, Heart, Gift, Moon, Sun, Flower, Palette, Brush, Wand2, LayoutGrid,
   Dog, Cat, Rabbit, Bird, Fish, Bug, Leaf, 
