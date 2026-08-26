@@ -1,4 +1,4 @@
-import { Figure } from '../types';
+import type { Figure } from '../types';
 
 interface FigureCardProps {
   figure: Figure;

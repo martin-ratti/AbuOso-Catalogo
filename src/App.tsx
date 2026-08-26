@@ -1,6 +1,6 @@
 import { Navbar } from './components/Navbar';
 import { FigureCard } from './components/FigureCard';
-import { Figure } from './types';
+import type { Figure } from './types';
 
 // Datos de prueba temporales hasta que leamos de Firebase
 const MOCK_FIGURES: Figure[] = [
