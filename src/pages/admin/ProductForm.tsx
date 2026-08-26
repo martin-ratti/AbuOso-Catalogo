@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { Navigate, Link, useNavigate } from 'react-router-dom';
 import { collection, addDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../../firebase';
+import { db } from '../../firebase';
 import { ArrowLeft, Upload, Loader2, Save } from 'lucide-react';
 
 const CATEGORIES = ['Todos', 'Nuevos', 'Combos', 'Ositos', 'Animalitos', 'Macetas', 'Navideñas'];
@@ -24,7 +23,10 @@ export function ProductForm() {
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState(CATEGORIES[3]); // Default Ositos
   const [badge, setBadge] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  
+  // Almacenamos el Base64 de la imagen
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const [fileName, setFileName] = useState('');
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -32,9 +34,47 @@ export function ProductForm() {
   if (loading) return <div className="flex-1 flex items-center justify-center">Cargando...</div>;
   if (!user) return <Navigate to="/admin" replace />;
 
+  // Función para comprimir la imagen en el navegador
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setFileName(file.name);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        // Redimensionar si es muy grande (max 800x800)
+        const MAX_SIZE = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height && width > MAX_SIZE) {
+          height *= MAX_SIZE / width;
+          width = MAX_SIZE;
+        } else if (height > MAX_SIZE) {
+          width *= MAX_SIZE / height;
+          height = MAX_SIZE;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        // Convertir a WebP con 70% de calidad (súper liviano)
+        const compressedBase64 = canvas.toDataURL('image/webp', 0.7);
+        setImageBase64(compressedBase64);
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !price || !description || !imageFile) {
+    if (!name || !price || !description || !imageBase64) {
       setError('Por favor, completa todos los campos y selecciona una imagen.');
       return;
     }
@@ -43,19 +83,14 @@ export function ProductForm() {
     setError('');
 
     try {
-      // 1. Subir imagen a Storage
-      const storageRef = ref(storage, `figures/${Date.now()}_${imageFile.name}`);
-      const snapshot = await uploadBytes(storageRef, imageFile);
-      const imageUrl = await getDownloadURL(snapshot.ref);
-
-      // 2. Guardar datos en Firestore
+      // 2. Guardar datos en Firestore directamente (la imagen ya está comprimida en Base64)
       const docData = {
         name,
         description,
         price: Number(price),
         category,
         badge: badge || null,
-        imageUrl,
+        imageUrl: imageBase64, // Guardamos el texto base64 como URL
         createdAt: new Date()
       };
 
@@ -66,7 +101,7 @@ export function ProductForm() {
 
     } catch (err: any) {
       console.error(err);
-      setError('Hubo un error al guardar la figura. Por favor intenta de nuevo.');
+      setError('Hubo un error al guardar la figura. Intenta de nuevo.');
     } finally {
       setIsSubmitting(false);
     }
@@ -158,17 +193,13 @@ export function ProductForm() {
               <input 
                 type="file" 
                 accept="image/*"
-                onChange={e => {
-                  if (e.target.files && e.target.files[0]) {
-                    setImageFile(e.target.files[0]);
-                  }
-                }}
+                onChange={handleImageChange}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               />
               <div className="flex flex-col items-center gap-2 text-gray-500 group-hover:text-abu-accent transition-colors">
                 <Upload size={32} />
                 <span className="text-sm font-medium">
-                  {imageFile ? imageFile.name : 'Toca para subir una imagen'}
+                  {fileName ? fileName : 'Toca para subir una imagen'}
                 </span>
               </div>
             </div>
