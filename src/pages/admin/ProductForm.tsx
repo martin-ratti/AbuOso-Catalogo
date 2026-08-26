@@ -1,12 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { useToastStore } from '../../store/toastStore';
-import { Navigate, Link, useNavigate } from 'react-router-dom';
-import { collection, addDoc } from 'firebase/firestore';
+import { Navigate, Link, useNavigate, useParams } from 'react-router-dom';
+import { collection, addDoc, getDocs, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { ArrowLeft, Upload, Loader2, Save } from 'lucide-react';
 
-const CATEGORIES = ['Todos', 'Nuevos', 'Combos', 'Ositos', 'Animalitos', 'Macetas', 'Navideñas'];
 const BADGES = [
   { value: '', label: 'Sin etiqueta' },
   { value: 'stock', label: 'En Stock (Verde)' },
@@ -19,19 +18,58 @@ export function ProductForm() {
   const { user, loading } = useAuthStore();
   const addToast = useToastStore((state) => state.addToast);
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const isEditing = !!id;
   
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
-  const [category, setCategory] = useState(CATEGORIES[3]); // Default Ositos
+  const [category, setCategory] = useState('');
   const [badge, setBadge] = useState('');
+  const [categories, setCategories] = useState<{id: string, name: string}[]>([]);
   
-  // Almacenamos el Base64 de la imagen
+  // Almacenamos el Base64 de la imagen o URL existente
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [fileName, setFileName] = useState('');
   
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const [isFetchingItem, setIsFetchingItem] = useState(isEditing);
+
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      // 1. Fetch categories
+      const snap = await getDocs(collection(db, 'categories'));
+      const cats = snap.docs.map(d => ({ id: d.id, name: d.data().name }));
+      setCategories(cats);
+
+      // 2. If editing, fetch product data
+      if (isEditing) {
+        try {
+          const docRef = doc(db, 'figures', id);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setName(data.name);
+            setDescription(data.description);
+            setPrice(data.price.toString());
+            setCategory(data.category);
+            setBadge(data.badge || '');
+            setImageBase64(data.imageUrl);
+          } else {
+            addToast('Figura no encontrada', 'error');
+            navigate('/admin/products');
+          }
+        } catch (error) {
+          addToast('Error al cargar la figura', 'error');
+        } finally {
+          setIsFetchingItem(false);
+        }
+      } else {
+        if (cats.length > 0) setCategory(cats[0].name);
+      }
+    };
+    fetchInitialData();
+  }, [id, isEditing]);
 
   if (loading) return <div className="flex-1 flex items-center justify-center">Cargando...</div>;
   if (!user) return <Navigate to="/admin" replace />;
@@ -65,7 +103,7 @@ export function ProductForm() {
         const ctx = canvas.getContext('2d');
         ctx?.drawImage(img, 0, 0, width, height);
 
-        // Convertir a WebP con 70% de calidad (súper liviano)
+        // Convertir a WebP con 70% de calidad
         const compressedBase64 = canvas.toDataURL('image/webp', 0.7);
         setImageBase64(compressedBase64);
       };
@@ -77,54 +115,57 @@ export function ProductForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !price || !description || !imageBase64) {
-      setError('Por favor, completa todos los campos y selecciona una imagen.');
+      addToast('Por favor, completa todos los campos y selecciona una imagen.', 'error');
       return;
     }
 
     setIsSubmitting(true);
-    setError('');
 
     try {
-      // 2. Guardar datos en Firestore directamente
-      const docData = {
+      const docData: any = {
         name,
         description,
         price: Number(price),
         category,
         badge: badge || null,
-        imageUrl: imageBase64, // Guardamos el texto base64 como URL
-        createdAt: new Date()
+        imageUrl: imageBase64
       };
 
-      await addDoc(collection(db, 'figures'), docData);
+      if (isEditing) {
+        await updateDoc(doc(db, 'figures', id), docData);
+        addToast('¡Figura actualizada exitosamente!', 'success');
+      } else {
+        docData.createdAt = new Date();
+        await addDoc(collection(db, 'figures'), docData);
+        addToast('¡Figura creada exitosamente!', 'success');
+      }
       
-      addToast('¡Figura creada exitosamente!', 'success');
-      navigate('/admin/dashboard');
+      navigate('/admin/products');
 
     } catch (err: any) {
       console.error(err);
-      setError(`Error al guardar: ${err.message || 'Intenta de nuevo.'}`);
+      addToast(`Error al guardar: ${err.message || 'Intenta de nuevo.'}`, 'error');
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  if (isFetchingItem) {
+    return <div className="flex-1 flex items-center justify-center"><Loader2 className="animate-spin text-abu-accent" size={40} /></div>;
+  }
+
   return (
     <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8 flex flex-col">
       <div className="mb-6">
-        <Link to="/admin/dashboard" className="inline-flex items-center gap-2 text-abu-brown hover:text-abu-accent transition-colors font-medium">
-          <ArrowLeft size={18} /> Volver al panel
+        <Link to="/admin/products" className="inline-flex items-center gap-2 text-abu-brown hover:text-abu-accent transition-colors font-medium">
+          <ArrowLeft size={18} /> Volver a productos
         </Link>
       </div>
 
       <div className="bg-white rounded-3xl shadow-sm border border-abu-cream p-6 sm:p-8">
-        <h2 className="text-2xl font-bold text-abu-brown mb-6">Cargar nueva figura</h2>
-        
-        {error && (
-          <div className="bg-red-50 text-red-500 text-sm p-3 rounded-xl mb-6 border border-red-100">
-            {error}
-          </div>
-        )}
+        <h2 className="text-2xl font-bold text-abu-brown mb-6">
+          {isEditing ? 'Editar Figura' : 'Cargar nueva figura'}
+        </h2>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           
@@ -158,8 +199,9 @@ export function ProductForm() {
                 onChange={e => setCategory(e.target.value)}
                 className="w-full bg-abu-light border border-abu-cream rounded-xl py-2.5 px-4 text-sm focus:outline-none focus:border-abu-accent"
               >
-                {CATEGORIES.filter(c => c !== 'Todos' && c !== 'Nuevos').map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
+                {categories.length === 0 && <option value="">Crea una categoría primero</option>}
+                {categories.map(cat => (
+                  <option key={cat.id} value={cat.name}>{cat.name}</option>
                 ))}
               </select>
             </div>
@@ -220,9 +262,9 @@ export function ProductForm() {
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
-                <><Loader2 size={20} className="animate-spin" /> Guardando y subiendo foto...</>
+                <><Loader2 size={20} className="animate-spin" /> {isEditing ? 'Actualizando...' : 'Guardando y subiendo foto...'}</>
               ) : (
-                <><Save size={20} /> Guardar Producto</>
+                <><Save size={20} /> {isEditing ? 'Guardar Cambios' : 'Guardar Producto'}</>
               )}
             </button>
           </div>

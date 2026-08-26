@@ -1,0 +1,99 @@
+import { useState, useEffect } from 'react';
+import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { db } from '../../firebase';
+import type { Figure } from '../../types';
+import { Link } from 'react-router-dom';
+import { ArrowLeft, Trash2, Edit, Plus, Loader2 } from 'lucide-react';
+import { useToastStore } from '../../store/toastStore';
+import { ConfirmModal } from '../../components/ConfirmModal';
+
+export function ProductList() {
+  const [figures, setFigures] = useState<Figure[]>([]);
+  const [loading, setLoading] = useState(true);
+  const addToast = useToastStore(s => s.addToast);
+  
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+
+  const fetchFigures = async () => {
+    setLoading(true);
+    try {
+      const snapshot = await getDocs(collection(db, 'figures'));
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Figure));
+      setFigures(data);
+    } catch (e) {
+      addToast('Error al cargar productos', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchFigures(); }, []);
+
+  const handleDeleteConfirm = async () => {
+    if (!itemToDelete) return;
+    try {
+      await deleteDoc(doc(db, 'figures', itemToDelete));
+      addToast('Producto eliminado', 'success');
+      setFigures(figures.filter(f => f.id !== itemToDelete));
+    } catch (e) {
+      addToast('Error al eliminar', 'error');
+    }
+    setItemToDelete(null);
+  };
+
+  return (
+    <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-8 flex flex-col">
+      <ConfirmModal 
+        isOpen={itemToDelete !== null}
+        title="Eliminar producto"
+        message="¿Estás seguro que deseas eliminar este producto? Esta acción no se puede deshacer."
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setItemToDelete(null)}
+      />
+
+      <div className="mb-6 flex justify-between items-center">
+        <Link to="/admin/dashboard" className="text-abu-brown hover:text-abu-accent flex items-center gap-2 font-medium">
+          <ArrowLeft size={18} /> Volver
+        </Link>
+        <Link to="/admin/products/new" className="bg-emerald-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 font-bold hover:bg-emerald-700">
+          <Plus size={18} /> Nuevo
+        </Link>
+      </div>
+
+      <div className="bg-white rounded-3xl shadow-sm border border-abu-cream p-6">
+        <h2 className="text-2xl font-bold text-abu-brown mb-6">Listado de Productos</h2>
+        
+        {loading ? (
+          <div className="flex justify-center py-10"><Loader2 className="animate-spin text-abu-accent" size={32} /></div>
+        ) : (
+          <div className="divide-y divide-abu-cream">
+            {figures.map(fig => (
+              <div key={fig.id} className="py-4 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  {fig.imageUrl.startsWith('data:') || fig.imageUrl.startsWith('http') ? (
+                     <img src={fig.imageUrl} alt={fig.name} className="w-16 h-16 rounded-xl object-cover bg-abu-cream/30 border border-abu-cream" />
+                  ) : (
+                     <div className="w-16 h-16 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400">Sin foto</div>
+                  )}
+                  <div>
+                    <h3 className="font-bold text-abu-brown">{fig.name}</h3>
+                    <p className="text-sm text-gray-500">{fig.category} • ${fig.price}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Link to={`/admin/products/edit/${fig.id}`} className="p-2 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors">
+                    <Edit size={20} />
+                  </Link>
+                  <button onClick={() => setItemToDelete(fig.id)} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
+                    <Trash2 size={20} />
+                  </button>
+                </div>
+              </div>
+            ))}
+            {figures.length === 0 && <p className="text-gray-500 py-4 text-center">No hay productos en la base de datos.</p>}
+          </div>
+        )}
+      </div>
+    </main>
+  );
+}

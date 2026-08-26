@@ -3,14 +3,17 @@ import { Navigate, Link } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
 import { LogOut, PackageSearch, PlusCircle, Tags, FolderPlus, Package, Tag } from 'lucide-react';
+import { useState } from 'react';
+import { ConfirmModal } from '../../components/ConfirmModal';
 
 export function Dashboard() {
   const { user, loading } = useAuthStore();
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   if (loading) return <div className="flex-1 flex items-center justify-center">Cargando...</div>;
   if (!user) return <Navigate to="/admin" replace />;
 
-  const handleLogout = () => {
+  const confirmLogout = () => {
     signOut(auth);
   };
 
@@ -51,6 +54,14 @@ export function Dashboard() {
 
   return (
     <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-8 flex flex-col">
+      <ConfirmModal 
+        isOpen={isLogoutModalOpen}
+        title="Cerrar sesión"
+        message="¿Estás seguro de que quieres cerrar la sesión de administrador?"
+        onConfirm={confirmLogout}
+        onCancel={() => setIsLogoutModalOpen(false)}
+      />
+
       <div className="mb-8">
         <h2 className="text-2xl sm:text-3xl font-bold text-abu-brown">Panel de Control</h2>
         <p className="text-gray-500 mt-1 text-lg">¡Bienvenido, {userName}!</p>
@@ -92,7 +103,7 @@ export function Dashboard() {
 
       <div className="mt-8 pt-6 border-t border-abu-cream flex justify-center">
         <button 
-          onClick={handleLogout}
+          onClick={() => setIsLogoutModalOpen(true)}
           className="flex items-center gap-2 text-red-500 hover:text-red-700 font-bold transition-colors py-2 px-4 rounded-xl hover:bg-red-50"
         >
           <LogOut size={18} /> Cerrar Sesión

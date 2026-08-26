@@ -5,6 +5,9 @@ import { ProductDetail } from './pages/ProductDetail';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/admin/Dashboard';
 import { ProductForm } from './pages/admin/ProductForm';
+import { ProductList } from './pages/admin/ProductList';
+import { CategoryList } from './pages/admin/CategoryList';
+import { CategoryForm } from './pages/admin/CategoryForm';
 import { ToastContainer } from './components/ToastContainer';
 import { Lock } from 'lucide-react';
 
@@ -20,8 +23,11 @@ function App() {
           <Route path="/producto/:id" element={<ProductDetail />} />
           <Route path="/admin" element={<Login />} />
           <Route path="/admin/dashboard" element={<Dashboard />} />
+          <Route path="/admin/products" element={<ProductList />} />
           <Route path="/admin/products/new" element={<ProductForm />} />
-          {/* Faltarían las rutas de ProductList, CategoryList, CategoryForm */}
+          <Route path="/admin/products/edit/:id" element={<ProductForm />} />
+          <Route path="/admin/categories" element={<CategoryList />} />
+          <Route path="/admin/categories/new" element={<CategoryForm />} />
         </Routes>
 
         <footer className="bg-abu-brown text-abu-cream py-8 text-center mt-auto relative">
