@@ -5,7 +5,7 @@ import { Home } from './pages/Home';
 import { ProductDetail } from './pages/ProductDetail';
 import { NotFound } from './pages/NotFound';
 import { ToastContainer } from './components/ToastContainer';
-import { Lock, Loader2 } from 'lucide-react';
+import { Lock, Loader2, Instagram } from 'lucide-react';
 
 // Lazy load de las páginas de admin (no las descarga el cliente que solo mira el catálogo)
 const Login = lazy(() => import('./pages/Login').then(m => ({ default: m.Login })));
@@ -49,8 +49,18 @@ function App() {
         <footer className="bg-abu-brown text-abu-cream py-8 text-center mt-auto relative">
           <div className="max-w-7xl mx-auto px-4 flex flex-col items-center gap-3">
             <img src="/logo.jpg" alt="Logo" className="w-10 h-10 rounded-full opacity-80 mix-blend-screen" />
-            <p className="font-medium text-base">AbuOso Artesanías</p>
-            <p className="text-xs opacity-80">© {new Date().getFullYear()} - Hecho con amor.</p>
+            <div className="flex flex-col items-center gap-1">
+              <p className="font-medium text-base">AbuOso Artesanías</p>
+              <a 
+                href="https://www.instagram.com/abuoso.artesanias/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm text-abu-cream/80 hover:text-white hover:scale-105 transition-all"
+              >
+                <Instagram size={16} /> @abuoso.artesanias
+              </a>
+            </div>
+            <p className="text-xs opacity-70 mt-1">© {new Date().getFullYear()} - Hecho con amor.</p>
           </div>
           
           {/* Botón oculto para admin */}
