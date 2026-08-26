@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useRef, useEffect } from 'react';
 import { Search, X, ShoppingBag, Plus, Minus, Send, XCircle, ArrowLeft } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { useSearchStore } from '../store/searchStore';
@@ -11,6 +12,18 @@ export function Navbar() {
   const location = useLocation();
   const { isCartOpen, toggleCart, items, getCartCount, getCartTotal, updateQuantity, removeItem } = useCartStore();
   const { searchQuery, setSearchQuery } = useSearchStore();
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  // Cerrar dropdown de búsqueda al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        if (searchQuery.length >= 3) setSearchQuery('');
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [searchQuery, setSearchQuery]);
 
   const handleWhatsAppOrder = () => {
     const whatsappNumber = APP_CONFIG.WHATSAPP_NUMBER;
@@ -46,7 +59,7 @@ export function Navbar() {
           
           {/* Barra de búsqueda (Desktop & Mobile if Home) */}
           {isHome && (
-            <div className="flex-1 max-w-md relative mx-2">
+            <div ref={searchRef} className="flex-1 max-w-md relative mx-2">
               <input 
                 type="text" 
                 value={searchQuery}

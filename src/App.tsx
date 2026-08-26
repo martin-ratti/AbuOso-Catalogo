@@ -1,16 +1,27 @@
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { Suspense, lazy } from 'react';
 import { Navbar } from './components/Navbar';
 import { Home } from './pages/Home';
 import { ProductDetail } from './pages/ProductDetail';
-import { Login } from './pages/Login';
-import { Dashboard } from './pages/admin/Dashboard';
-import { ProductForm } from './pages/admin/ProductForm';
-import { ProductList } from './pages/admin/ProductList';
-import { CategoryList } from './pages/admin/CategoryList';
-import { CategoryForm } from './pages/admin/CategoryForm';
 import { NotFound } from './pages/NotFound';
 import { ToastContainer } from './components/ToastContainer';
-import { Lock } from 'lucide-react';
+import { Lock, Loader2 } from 'lucide-react';
+
+// Lazy load de las páginas de admin (no las descarga el cliente que solo mira el catálogo)
+const Login = lazy(() => import('./pages/Login').then(m => ({ default: m.Login })));
+const Dashboard = lazy(() => import('./pages/admin/Dashboard').then(m => ({ default: m.Dashboard })));
+const ProductForm = lazy(() => import('./pages/admin/ProductForm').then(m => ({ default: m.ProductForm })));
+const ProductList = lazy(() => import('./pages/admin/ProductList').then(m => ({ default: m.ProductList })));
+const CategoryList = lazy(() => import('./pages/admin/CategoryList').then(m => ({ default: m.CategoryList })));
+const CategoryForm = lazy(() => import('./pages/admin/CategoryForm').then(m => ({ default: m.CategoryForm })));
+
+function AdminFallback() {
+  return (
+    <div className="flex-1 flex items-center justify-center py-20">
+      <Loader2 size={32} className="animate-spin text-abu-accent" />
+    </div>
+  );
+}
 
 function App() {
   return (
@@ -22,13 +33,15 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/producto/:id" element={<ProductDetail />} />
-          <Route path="/admin" element={<Login />} />
-          <Route path="/admin/dashboard" element={<Dashboard />} />
-          <Route path="/admin/products" element={<ProductList />} />
-          <Route path="/admin/products/new" element={<ProductForm />} />
-          <Route path="/admin/products/edit/:id" element={<ProductForm />} />
-          <Route path="/admin/categories" element={<CategoryList />} />
-          <Route path="/admin/categories/new" element={<CategoryForm />} />
+          
+          {/* Rutas Admin - cargadas bajo demanda */}
+          <Route path="/admin" element={<Suspense fallback={<AdminFallback />}><Login /></Suspense>} />
+          <Route path="/admin/dashboard" element={<Suspense fallback={<AdminFallback />}><Dashboard /></Suspense>} />
+          <Route path="/admin/products" element={<Suspense fallback={<AdminFallback />}><ProductList /></Suspense>} />
+          <Route path="/admin/products/new" element={<Suspense fallback={<AdminFallback />}><ProductForm /></Suspense>} />
+          <Route path="/admin/products/edit/:id" element={<Suspense fallback={<AdminFallback />}><ProductForm /></Suspense>} />
+          <Route path="/admin/categories" element={<Suspense fallback={<AdminFallback />}><CategoryList /></Suspense>} />
+          <Route path="/admin/categories/new" element={<Suspense fallback={<AdminFallback />}><CategoryForm /></Suspense>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
 
