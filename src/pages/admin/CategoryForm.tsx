@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { collection, addDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, Loader2, Search,
   Smile, PawPrint, TreePine, Sprout, Package, Sparkles, Star, Heart, Gift, Moon, Sun, Flower, Palette, Brush, Wand2, LayoutGrid,
   Dog, Cat, Rabbit, Bird, Fish, Bug, Leaf, 
