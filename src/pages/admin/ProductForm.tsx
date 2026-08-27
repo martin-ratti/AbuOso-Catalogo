@@ -138,19 +138,19 @@ export function ProductForm() {
   }
 
   return (
-    <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8 flex flex-col">
-      <div className="mb-6">
-        <Link to="/admin/products" className="inline-flex items-center gap-2 text-abu-brown hover:text-abu-accent transition-colors font-medium">
-          <ArrowLeft size={18} /> Volver a productos
-        </Link>
+    <main className="flex-1 max-w-2xl mx-auto w-full px-3 sm:px-4 py-5 sm:py-8 flex flex-col">
+      <div className="mb-4 sm:mb-6">
+        <button type="button" onClick={() => navigate(-1)} className="inline-flex items-center gap-2 text-abu-brown hover:text-abu-accent transition-colors font-medium text-sm sm:text-base">
+          <ArrowLeft size={18} /> Volver
+        </button>
       </div>
 
-      <div className="bg-white rounded-3xl shadow-sm border border-abu-cream p-6 sm:p-8">
-        <h2 className="text-2xl font-bold text-abu-brown mb-6">
+      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-abu-cream p-5 sm:p-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-abu-brown mb-5 sm:mb-6">
           {isEditing ? 'Editar Figura' : 'Cargar nueva figura'}
         </h2>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 sm:gap-5">
           
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">Nombre de la figura</label>

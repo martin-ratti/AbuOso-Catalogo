@@ -152,18 +152,18 @@ export function CategoryForm() {
   }
 
   return (
-    <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8 flex flex-col">
-      <div className="mb-6">
-        <Link to="/admin/categories" className="text-abu-brown hover:text-abu-accent flex items-center gap-2 font-medium w-fit">
-          <ArrowLeft size={18} /> Volver a categorías
-        </Link>
+    <main className="flex-1 max-w-2xl mx-auto w-full px-3 sm:px-4 py-5 sm:py-8 flex flex-col">
+      <div className="mb-4 sm:mb-6">
+        <button type="button" onClick={() => navigate(-1)} className="text-abu-brown hover:text-abu-accent flex items-center gap-2 font-medium w-fit text-sm sm:text-base">
+          <ArrowLeft size={18} /> Volver
+        </button>
       </div>
 
-      <div className="bg-white rounded-3xl shadow-sm border border-abu-cream p-6 sm:p-8">
-        <h2 className="text-2xl font-bold text-abu-brown mb-6">
+      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-abu-cream p-5 sm:p-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-abu-brown mb-5 sm:mb-6">
           {isEditing ? 'Editar Categoría' : 'Nueva Categoría'}
         </h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 sm:gap-5">
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">Nombre de la categoría</label>
             <input 
@@ -171,7 +171,7 @@ export function CategoryForm() {
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="Ej: Dinosaurios" 
-              className="w-full bg-abu-light border border-abu-cream rounded-xl py-2.5 px-4 focus:outline-none focus:border-abu-accent"
+              className="w-full bg-abu-light border border-abu-cream rounded-xl py-3 sm:py-2.5 px-4 focus:outline-none focus:border-abu-accent text-sm"
             />
           </div>
 
@@ -184,26 +184,26 @@ export function CategoryForm() {
                   placeholder="Buscar icono..."
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
-                  className="bg-abu-light border border-abu-cream rounded-lg py-1.5 pl-8 pr-3 text-sm focus:outline-none focus:border-abu-accent w-full sm:w-48"
+                  className="bg-abu-light border border-abu-cream rounded-lg py-2 sm:py-1.5 pl-8 pr-3 text-sm focus:outline-none focus:border-abu-accent w-full sm:w-48"
                 />
-                <Search size={14} className="absolute left-2.5 top-2.5 text-gray-400" />
+                <Search size={16} className="absolute left-2.5 top-2.5 sm:top-2 text-gray-400 sm:w-3.5 sm:h-3.5" />
               </div>
             </div>
             
-            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3 max-h-60 overflow-y-auto p-1 hide-scrollbar">
+            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 sm:gap-3 max-h-[40vh] sm:max-h-60 overflow-y-auto p-1 hide-scrollbar">
               {filteredIcons.map(({ name: iName, component: Icon }) => (
                 <button
                   key={iName}
                   type="button"
                   onClick={() => setIconName(iName)}
                   title={iName}
-                  className={`flex items-center justify-center p-3 rounded-xl border-2 transition-colors ${
+                  className={`flex items-center justify-center p-3 sm:p-3 rounded-xl border-2 transition-colors active:scale-95 ${
                     iconName === iName 
                       ? 'border-abu-accent bg-abu-cream text-abu-brown' 
                       : 'border-abu-cream bg-abu-light text-gray-400 hover:text-abu-brown'
                   }`}
                 >
-                  <Icon size={24} strokeWidth={1.5} />
+                  <Icon strokeWidth={1.5} className="w-7 h-7 sm:w-6 sm:h-6" />
                 </button>
               ))}
               {filteredIcons.length === 0 && (

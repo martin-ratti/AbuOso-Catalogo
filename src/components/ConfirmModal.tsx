@@ -13,8 +13,8 @@ export function ConfirmModal({ isOpen, title, message, confirmText = 'Eliminar',
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-xl relative animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 w-full max-w-sm shadow-xl relative animate-in fade-in zoom-in duration-200">
         <button 
           onClick={onCancel}
           className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 transition-colors"

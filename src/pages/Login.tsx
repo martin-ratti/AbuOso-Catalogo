@@ -36,9 +36,9 @@ export function Login() {
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center p-4">
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-abu-cream w-full max-w-sm text-center">
-        <h2 className="text-2xl font-bold text-abu-brown mb-6">Acceso Admin</h2>
+    <div className="flex-1 flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-white p-6 sm:p-8 rounded-2xl sm:rounded-3xl shadow-sm border border-abu-cream w-full max-w-sm text-center">
+        <h2 className="text-xl sm:text-2xl font-bold text-abu-brown mb-5 sm:mb-6">Acceso Admin</h2>
         
         {error && (
           <div className="bg-red-50 text-red-500 text-sm p-3 rounded-lg mb-4 border border-red-100">

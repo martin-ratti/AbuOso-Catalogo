@@ -87,7 +87,7 @@ export function Dashboard() {
   const userName = user.email?.includes('roman') ? 'Román' : 'Admin';
 
   return (
-    <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8 flex flex-col gap-8">
+    <main className="flex-1 max-w-5xl mx-auto w-full px-3 sm:px-4 py-5 sm:py-8 flex flex-col gap-5 sm:gap-8">
       <ConfirmModal 
         isOpen={isLogoutModalOpen}
         title="Cerrar sesión"
@@ -98,11 +98,11 @@ export function Dashboard() {
       />
 
       {/* Hero Banner */}
-      <div className="bg-linear-to-br from-abu-brown to-abu-dark rounded-3xl p-8 sm:p-10 text-white shadow-lg relative overflow-hidden">
+      <div className="bg-linear-to-br from-abu-brown to-abu-dark rounded-2xl sm:rounded-3xl p-5 sm:p-8 lg:p-10 text-white shadow-lg relative overflow-hidden">
         <div className="relative z-10">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-2">¡Hola, {userName}! 👋</h2>
-          <p className="text-abu-cream text-lg max-w-xl opacity-90">
-            Bienvenido al centro de control. Desde aquí podés administrar todo tu catálogo y ver el estado general de tu tienda.
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1 sm:mb-2">¡Hola, {userName}! 👋</h2>
+          <p className="text-abu-cream text-sm sm:text-lg max-w-xl opacity-90">
+            Bienvenido al centro de control. Desde aquí podés administrar todo tu catálogo.
           </p>
         </div>
         
@@ -112,26 +112,26 @@ export function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-8">
         
         {/* Columna Izquierda: Acciones (Ocupa 2/3 en desktop) */}
-        <div className="lg:col-span-2 flex flex-col gap-6">
-          <h3 className="text-xl font-bold text-abu-brown flex items-center gap-2">
-            <TrendingUp className="text-abu-accent" /> Acciones Rápidas
+        <div className="lg:col-span-2 flex flex-col gap-4 sm:gap-6">
+          <h3 className="text-base sm:text-xl font-bold text-abu-brown flex items-center gap-2">
+            <TrendingUp className="text-abu-accent" size={20} /> Acciones Rápidas
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
             {adminActions.map((action, idx) => (
               <Link 
                 key={idx}
                 to={action.link}
-                className={`p-6 rounded-3xl border transition-all hover:scale-[1.02] active:scale-95 text-left flex flex-col gap-4 shadow-sm ${action.color}`}
+                className={`p-4 sm:p-6 rounded-2xl sm:rounded-3xl border transition-all hover:scale-[1.02] active:scale-95 text-left flex flex-col gap-2.5 sm:gap-4 shadow-sm ${action.color}`}
               >
-                <div className="bg-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm">
+                <div className="bg-white w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-sm">
                   {action.icon}
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-800 mb-1">{action.title}</h3>
-                  <p className="text-sm text-gray-600">{action.description}</p>
+                  <h3 className="text-sm sm:text-lg font-bold text-gray-800 mb-0.5 sm:mb-1">{action.title}</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">{action.description}</p>
                 </div>
               </Link>
             ))}
@@ -142,34 +142,34 @@ export function Dashboard() {
         <div className="flex flex-col gap-6">
           
           {/* Widget Estadísticas Reales */}
-          <div className="bg-white p-6 rounded-3xl border border-abu-cream shadow-sm flex flex-col gap-4">
-            <h3 className="font-bold text-abu-brown text-lg border-b border-abu-cream pb-3">Resumen de Tienda</h3>
+          <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-abu-cream shadow-sm flex flex-col gap-3 sm:gap-4">
+            <h3 className="font-bold text-abu-brown text-base sm:text-lg border-b border-abu-cream pb-2.5 sm:pb-3">Resumen de Tienda</h3>
             
             <div className="flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <div className="bg-orange-100 text-orange-600 p-3 rounded-xl"><Package size={20} /></div>
-                <span className="font-medium text-gray-600">Productos Totales</span>
+              <div className="flex items-center gap-2.5 sm:gap-3">
+                <div className="bg-orange-100 text-orange-600 p-2.5 sm:p-3 rounded-xl"><Package size={18} /></div>
+                <span className="font-medium text-gray-600 text-sm">Productos</span>
               </div>
-              <span className="text-2xl font-black text-abu-brown">
+              <span className="text-xl sm:text-2xl font-black text-abu-brown">
                 {isLoadingStats ? '...' : stats.products}
               </span>
             </div>
             
-            <div className="flex justify-between items-center mt-2">
-              <div className="flex items-center gap-3">
-                <div className="bg-blue-100 text-blue-600 p-3 rounded-xl"><Tag size={20} /></div>
-                <span className="font-medium text-gray-600">Categorías</span>
+            <div className="flex justify-between items-center mt-1 sm:mt-2">
+              <div className="flex items-center gap-2.5 sm:gap-3">
+                <div className="bg-blue-100 text-blue-600 p-2.5 sm:p-3 rounded-xl"><Tag size={18} /></div>
+                <span className="font-medium text-gray-600 text-sm">Categorías</span>
               </div>
-              <span className="text-2xl font-black text-abu-brown">
+              <span className="text-xl sm:text-2xl font-black text-abu-brown">
                 {isLoadingStats ? '...' : stats.categories}
               </span>
             </div>
           </div>
 
           {/* Widget Últimos Productos */}
-          <div className="bg-white p-6 rounded-3xl border border-abu-cream shadow-sm flex flex-col gap-4">
-            <div className="flex justify-between items-end border-b border-abu-cream pb-3">
-              <h3 className="font-bold text-abu-brown text-lg">Últimos agregados</h3>
+          <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-abu-cream shadow-sm flex flex-col gap-3 sm:gap-4">
+            <div className="flex justify-between items-end border-b border-abu-cream pb-2.5 sm:pb-3">
+              <h3 className="font-bold text-abu-brown text-base sm:text-lg">Últimos agregados</h3>
               <Link to="/admin/products" className="text-xs text-abu-accent font-bold hover:underline">Ver todos</Link>
             </div>
             

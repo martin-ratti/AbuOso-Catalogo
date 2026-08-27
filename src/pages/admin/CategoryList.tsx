@@ -43,7 +43,7 @@ export function CategoryList() {
   };
 
   return (
-    <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8 flex flex-col">
+    <main className="flex-1 max-w-2xl mx-auto w-full px-3 sm:px-4 py-5 sm:py-8 flex flex-col">
       <ConfirmModal 
         isOpen={itemToDelete !== null}
         title="Eliminar categoría"
@@ -52,18 +52,18 @@ export function CategoryList() {
         onCancel={() => setItemToDelete(null)}
       />
 
-      <div className="mb-6 flex justify-between items-center">
-        <Link to="/admin/dashboard" className="text-abu-brown hover:text-abu-accent flex items-center gap-2 font-medium">
+      <div className="mb-4 sm:mb-6 flex justify-between items-center">
+        <Link to="/admin/dashboard" className="text-abu-brown hover:text-abu-accent flex items-center gap-2 font-medium text-sm sm:text-base">
           <ArrowLeft size={18} /> Volver
         </Link>
-        <Link to="/admin/categories/new" className="bg-purple-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 font-bold hover:bg-purple-700">
+        <Link to="/admin/categories/new" className="bg-purple-600 text-white px-3 sm:px-4 py-2 rounded-xl flex items-center gap-1.5 sm:gap-2 font-bold hover:bg-purple-700 transition-all active:scale-95 text-sm sm:text-base hover:shadow-md">
           <Plus size={18} /> Nueva
         </Link>
       </div>
 
-      <div className="bg-white rounded-3xl shadow-sm border border-abu-cream p-6">
-        <h2 className="text-2xl font-bold text-abu-brown mb-6 flex items-center gap-2">
-          <Tags className="text-purple-600" /> Categorías
+      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-abu-cream p-4 sm:p-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-abu-brown mb-4 sm:mb-6 flex items-center gap-2">
+          <Tags className="text-purple-600" size={24} /> Categorías
         </h2>
         
         {loading ? (
@@ -71,19 +71,19 @@ export function CategoryList() {
         ) : (
           <div className="divide-y divide-abu-cream">
             {categories.map(cat => (
-              <div key={cat.id} className="py-4 flex items-center justify-between gap-4">
-                <span className="font-bold text-abu-dark text-lg">{cat.name}</span>
-                <div className="flex items-center gap-1">
-                  <Link to={`/admin/categories/edit/${cat.id}`} className="p-2 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors">
-                    <Edit size={20} />
+              <div key={cat.id} className="py-3 sm:py-4 flex items-center justify-between gap-3 sm:gap-4">
+                <span className="font-bold text-abu-dark text-base sm:text-lg truncate">{cat.name}</span>
+                <div className="flex items-center gap-1 shrink-0">
+                  <Link to={`/admin/categories/edit/${cat.id}`} className="p-2 sm:p-2.5 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors active:scale-95">
+                    <Edit size={18} className="sm:w-5 sm:h-5" />
                   </Link>
-                  <button onClick={() => setItemToDelete(cat.id)} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
-                    <Trash2 size={20} />
+                  <button onClick={() => setItemToDelete(cat.id)} className="p-2 sm:p-2.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors active:scale-95">
+                    <Trash2 size={18} className="sm:w-5 sm:h-5" />
                   </button>
                 </div>
               </div>
             ))}
-            {categories.length === 0 && <p className="text-gray-500 py-4 text-center">No hay categorías dinámicas. Ve a crear una.</p>}
+            {categories.length === 0 && <p className="text-gray-500 py-4 text-center text-sm sm:text-base">No hay categorías dinámicas. Ve a crear una.</p>}
           </div>
         )}
       </div>
