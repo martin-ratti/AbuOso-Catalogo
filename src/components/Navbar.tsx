@@ -146,14 +146,14 @@ export function Navbar() {
       {/* Overlay Oscuro para el carrito */}
       {!isAdmin && isCartOpen && (
         <div 
-          className="fixed inset-0 bg-black/40 z-[60] transition-opacity backdrop-blur-sm"
+          className="fixed inset-0 bg-black/40 z-[60] transition-opacity"
           onClick={toggleCart}
         />
       )}
 
       {/* Sidebar del Carrito */}
       {!isAdmin && (
-        <div className={`fixed top-0 right-0 bottom-0 w-full max-w-[380px] bg-white z-[70] shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className={`fixed top-0 right-0 bottom-0 w-full max-w-[380px] bg-white z-[70] shadow-2xl transform transition-transform duration-300 ease-in-out will-change-transform flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="p-4 flex items-center justify-between border-b border-abu-cream bg-abu-light">
           <div className="flex items-center gap-2 text-abu-brown">
             <ShoppingBag size={20} aria-hidden="true" />
