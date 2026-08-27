@@ -46,21 +46,21 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
 
-        <footer className="bg-abu-brown text-abu-cream py-8 text-center mt-auto relative">
-          <div className="max-w-7xl mx-auto px-4 flex flex-col items-center gap-3">
-            <img src="/logo.jpg" alt="Logo" className="w-10 h-10 rounded-full opacity-80 mix-blend-screen" />
+        <footer className="bg-abu-brown text-abu-cream py-6 sm:py-8 text-center mt-auto relative safe-bottom">
+          <div className="max-w-7xl mx-auto px-4 flex flex-col items-center gap-2.5 sm:gap-3">
+            <img src="/logo.jpg" alt="Logo" className="w-9 h-9 sm:w-10 sm:h-10 rounded-full opacity-80 mix-blend-screen" />
             <div className="flex flex-col items-center gap-1">
-              <p className="font-medium text-base">AbuOso Artesanías</p>
+              <p className="font-semibold text-sm sm:text-base">AbuOso Artesanías</p>
               <a 
                 href="https://www.instagram.com/abuoso.artesanias/" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-sm text-abu-cream/80 hover:text-white hover:scale-105 transition-all"
+                className="flex items-center gap-1.5 text-xs sm:text-sm text-abu-cream/80 hover:text-white hover:scale-105 transition-all active:scale-95"
               >
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
-                  width="16" 
-                  height="16" 
+                  width="14" 
+                  height="14" 
                   viewBox="0 0 24 24" 
                   fill="none" 
                   stroke="currentColor" 
@@ -71,19 +71,20 @@ function App() {
                   <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
                   <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
                   <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
-                </svg> @abuoso.artesanias
+                </svg>
+                @abuoso.artesanias
               </a>
             </div>
-            <p className="text-xs opacity-70 mt-1">© {new Date().getFullYear()} - Hecho con amor.</p>
+            <p className="text-[11px] sm:text-xs opacity-60 mt-0.5">© {new Date().getFullYear()} - Hecho con amor ❤️</p>
           </div>
           
           {/* Botón oculto para admin */}
           <Link 
             to="/admin" 
-            className="absolute bottom-4 right-4 text-abu-cream/50 hover:text-white transition-colors"
+            className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 text-abu-cream/30 hover:text-white transition-colors p-1"
             title="Administración"
           >
-            <Lock size={16} />
+            <Lock size={14} />
           </Link>
         </footer>
       </div>

@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -6,11 +7,20 @@
   --color-abu-cream: #f4ebd8;
   --color-abu-light: #fdfbf7;
   --color-abu-accent: #8b5a33;
+  --color-abu-warm: #e8d5c0;
+  --font-sans: 'Nunito', system-ui, -apple-system, sans-serif;
 }
 
 body {
   background-color: var(--color-abu-light);
   color: var(--color-abu-dark);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
@@ -19,6 +29,58 @@ body {
 }
 /* Hide scrollbar for IE, Edge and Firefox */
 .hide-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom scrollbar para el sidebar del carrito */
+.cart-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.cart-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.cart-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--color-abu-cream);
+  border-radius: 20px;
+}
+
+/* Fade-in animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+
+/* Stagger animation delay utilities */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+
+/* Safe area insets para móviles con notch */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Mejorar taps en móvil */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Selección de texto con colores de marca */
+::selection {
+  background-color: var(--color-abu-cream);
+  color: var(--color-abu-brown);
 }
