@@ -25,6 +25,16 @@ export function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [searchQuery, setSearchQuery]);
 
+  // Bloquear scroll del body cuando el carrito está abierto
+  useEffect(() => {
+    if (isCartOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isCartOpen]);
+
   const handleWhatsAppOrder = () => {
     const whatsappNumber = APP_CONFIG.WHATSAPP_NUMBER;
     let message = "¡Hola! Quisiera realizar el siguiente pedido:\n\n";
@@ -42,40 +52,40 @@ export function Navbar() {
 
   return (
     <>
-      <header className="bg-white shadow-sm sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+      <header className="bg-white/95 backdrop-blur-md shadow-sm sticky top-0 z-40 border-b border-abu-cream/50">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4">
           
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity whitespace-nowrap">
+          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity whitespace-nowrap shrink-0">
             <img 
               src="/logo.jpg" 
               alt="AbuOso Logo" 
-              className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover border-2 border-abu-cream shadow-sm" 
+              className="w-9 h-9 sm:w-11 sm:h-11 rounded-full object-cover border-2 border-abu-cream shadow-sm" 
             />
-            <h1 className="font-bold text-lg sm:text-xl text-abu-brown tracking-tight hidden xs:block">
+            <h1 className="font-extrabold text-base sm:text-xl text-abu-brown tracking-tight">
               AbuOso <span className="font-medium text-abu-accent hidden md:inline">Artesanías</span>
             </h1>
           </Link>
           
-          {/* Barra de búsqueda (Desktop & Mobile if Home) */}
+          {/* Barra de búsqueda */}
           {isHome && (
-            <div ref={searchRef} className="flex-1 max-w-md relative mx-2">
+            <div ref={searchRef} className="flex-1 max-w-md relative mx-1 sm:mx-2">
               <input 
                 type="text" 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar figuras..." 
-                className="w-full bg-abu-light border border-abu-cream rounded-full py-2 pl-4 pr-10 text-sm focus:outline-none focus:border-abu-accent focus:ring-1 focus:ring-abu-accent transition-all text-abu-dark"
+                className="w-full bg-abu-light border border-abu-cream rounded-full py-2 pl-4 pr-10 text-sm focus:outline-none focus:border-abu-accent focus:ring-2 focus:ring-abu-accent/20 transition-all text-abu-dark placeholder:text-gray-400"
               />
               {searchQuery ? (
                 <button 
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-2.5 text-gray-400 hover:text-abu-accent"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-abu-accent p-0.5"
                 >
                   <X size={16} />
                 </button>
               ) : (
-                <Search size={16} className="absolute right-3 top-2.5 text-gray-400" />
+                <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
               )}
               
               {/* Dropdown de Autocompletado */}
@@ -97,7 +107,7 @@ export function Navbar() {
                         onClick={() => setSearchQuery('')}
                         className="flex items-center gap-3 p-3 hover:bg-abu-light transition-colors border-b border-gray-50 last:border-0"
                       >
-                        <img src={figure.imageUrl} alt={figure.name} className="w-12 h-12 rounded-xl object-cover bg-abu-cream" />
+                        <img src={figure.imageUrl} alt={figure.name} className="w-11 h-11 rounded-xl object-cover bg-abu-cream" />
                         <div>
                           <p className="font-bold text-sm text-abu-brown">{figure.name}</p>
                           <p className="text-xs font-medium text-abu-accent">${formatPrice(figure.price)}</p>
@@ -111,29 +121,29 @@ export function Navbar() {
           )}
 
           {!isAdmin ? (
-            <div className="flex items-center gap-2 sm:gap-6">
+            <div className="flex items-center">
               {/* Botón Carrito Global */}
               <button 
                 onClick={toggleCart}
                 aria-label="Abrir carrito"
-                className="relative p-2 text-abu-brown hover:bg-abu-cream rounded-full transition-colors flex-shrink-0"
+                className="relative p-2.5 text-abu-brown hover:bg-abu-cream/50 rounded-full transition-colors flex-shrink-0 active:scale-95"
               >
                 <ShoppingBag size={22} aria-hidden="true" />
                 {getCartCount() > 0 && (
-                  <span className="absolute top-0 right-0 bg-abu-accent text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+                  <span className="absolute top-1 right-1 bg-abu-accent text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
                     {getCartCount()}
                   </span>
                 )}
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <span className="hidden sm:inline-flex items-center bg-purple-100 text-purple-700 text-xs font-bold px-3 py-1.5 rounded-full border border-purple-200">
                 Modo Admin
               </span>
               <Link 
                 to="/" 
-                className="flex items-center gap-2 text-sm font-bold text-abu-brown hover:text-abu-accent transition-colors bg-abu-light py-2 px-4 rounded-full"
+                className="flex items-center gap-2 text-sm font-bold text-abu-brown hover:text-abu-accent transition-colors bg-abu-light py-2 px-3 sm:px-4 rounded-full"
               >
                 <Store size={18} />
                 <span className="hidden sm:inline">Ver Tienda</span>
@@ -146,53 +156,58 @@ export function Navbar() {
       {/* Overlay Oscuro para el carrito */}
       {!isAdmin && isCartOpen && (
         <div 
-          className="fixed inset-0 bg-black/40 z-[60] transition-opacity"
+          className="fixed inset-0 bg-black/50 z-[60] transition-opacity backdrop-blur-[2px]"
           onClick={toggleCart}
         />
       )}
 
       {/* Sidebar del Carrito */}
       {!isAdmin && (
-        <div className={`fixed top-0 right-0 bottom-0 w-full max-w-[380px] bg-white z-[70] shadow-2xl transform transition-transform duration-300 ease-in-out will-change-transform flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-        <div className="p-4 flex items-center justify-between border-b border-abu-cream bg-abu-light">
-          <div className="flex items-center gap-2 text-abu-brown">
+        <div className={`fixed top-0 right-0 bottom-0 w-full max-w-[400px] bg-white z-[70] shadow-2xl transform transition-transform duration-300 ease-in-out will-change-transform flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className="p-4 flex items-center justify-between border-b border-abu-cream bg-abu-light/80">
+          <div className="flex items-center gap-2.5 text-abu-brown">
             <ShoppingBag size={20} aria-hidden="true" />
             <h2 className="font-bold text-lg">Tu Pedido</h2>
+            {items.length > 0 && (
+              <span className="bg-abu-accent text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
+                {getCartCount()}
+              </span>
+            )}
           </div>
-          <button onClick={toggleCart} aria-label="Cerrar carrito" className="p-1 text-gray-500 hover:text-abu-brown bg-white rounded-full border border-gray-200 transition-colors">
-            <X size={20} aria-hidden="true" />
+          <button onClick={toggleCart} aria-label="Cerrar carrito" className="p-1.5 text-gray-400 hover:text-abu-brown bg-white rounded-full border border-gray-200 transition-colors active:scale-95">
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
         
-        <div className="p-4 flex-1 overflow-y-auto flex flex-col gap-4 bg-gray-50/50">
+        <div className="p-3 sm:p-4 flex-1 overflow-y-auto flex flex-col gap-3 bg-gray-50/50 cart-scrollbar">
           {items.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center text-gray-400 gap-4">
-              <div className="bg-abu-light p-6 rounded-full text-abu-cream">
-                <ShoppingBag size={48} />
+            <div className="flex-1 flex flex-col items-center justify-center text-gray-400 gap-4 py-12">
+              <div className="bg-abu-light p-5 rounded-full text-abu-cream">
+                <ShoppingBag size={44} />
               </div>
               <p className="font-medium text-gray-500">Tu carrito está vacío.</p>
               <button 
                 onClick={toggleCart}
-                className="mt-2 text-abu-accent hover:text-abu-brown font-bold flex items-center gap-2 transition-colors"
+                className="mt-2 text-abu-accent hover:text-abu-brown font-bold flex items-center gap-2 transition-colors text-sm"
               >
                 <ArrowLeft size={16} /> Volver al catálogo
               </button>
             </div>
           ) : (
             items.map(item => (
-              <div key={item.id} className="flex gap-4 items-center bg-white border border-abu-cream p-3 rounded-2xl shadow-sm">
-                <img src={item.imageUrl} alt={item.name} className="w-20 h-20 rounded-xl object-cover bg-abu-light" />
-                <div className="flex-1 flex flex-col">
-                  <h4 className="font-bold text-sm text-abu-brown leading-tight mb-1">{item.name}</h4>
-                  <p className="text-abu-accent text-sm font-bold mb-3">${formatPrice(item.price)}</p>
+              <div key={item.id} className="flex gap-3 items-center bg-white border border-abu-cream/80 p-2.5 sm:p-3 rounded-2xl shadow-sm">
+                <img src={item.imageUrl} alt={item.name} className="w-[72px] h-[72px] sm:w-20 sm:h-20 rounded-xl object-cover bg-abu-light shrink-0" />
+                <div className="flex-1 flex flex-col min-w-0">
+                  <h4 className="font-bold text-sm text-abu-brown leading-tight mb-0.5 truncate">{item.name}</h4>
+                  <p className="text-abu-accent text-sm font-bold mb-2">${formatPrice(item.price)}</p>
                   
-                  <div className="flex items-center justify-between mt-auto">
-                    <div className="flex items-center gap-3 bg-abu-light rounded-xl border border-abu-cream px-1 py-1">
-                      <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="p-1 text-gray-500 hover:text-abu-accent transition-colors"><Minus size={14} /></button>
-                      <span className="text-xs font-bold w-4 text-center">{item.quantity}</span>
-                      <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="p-1 text-gray-500 hover:text-abu-accent transition-colors"><Plus size={14} /></button>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 bg-abu-light rounded-xl border border-abu-cream px-1 py-0.5">
+                      <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="p-1.5 text-gray-500 hover:text-abu-accent transition-colors active:scale-90"><Minus size={14} /></button>
+                      <span className="text-xs font-bold w-5 text-center">{item.quantity}</span>
+                      <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="p-1.5 text-gray-500 hover:text-abu-accent transition-colors active:scale-90"><Plus size={14} /></button>
                     </div>
-                    <button onClick={() => removeItem(item.id)} className="text-gray-400 hover:text-red-500 p-1.5 bg-gray-50 rounded-full transition-colors">
+                    <button onClick={() => removeItem(item.id)} className="text-gray-400 hover:text-red-500 p-1.5 hover:bg-red-50 rounded-full transition-colors active:scale-90">
                       <XCircle size={18} />
                     </button>
                   </div>
@@ -203,22 +218,22 @@ export function Navbar() {
         </div>
 
         {items.length > 0 && (
-          <div className="p-4 border-t border-abu-cream bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-            <div className="flex justify-between items-center mb-4 bg-abu-light p-3 rounded-xl border border-abu-cream">
-              <span className="text-gray-600 font-bold">Total estimado:</span>
-              <span className="text-2xl font-black text-abu-brown">${formatPrice(getCartTotal())}</span>
+          <div className="p-3 sm:p-4 border-t border-abu-cream bg-white shadow-[0_-4px_12px_-2px_rgba(0,0,0,0.06)] safe-bottom">
+            <div className="flex justify-between items-center mb-3 bg-abu-light p-3 rounded-xl border border-abu-cream">
+              <span className="text-gray-600 font-bold text-sm">Total estimado:</span>
+              <span className="text-xl sm:text-2xl font-black text-abu-brown">${formatPrice(getCartTotal())}</span>
             </div>
             <div className="flex flex-col gap-2">
               <button 
                 onClick={handleWhatsAppOrder}
-                className="w-full bg-[#25D366] hover:bg-[#20b858] text-white font-bold py-3.5 rounded-xl transition-all active:scale-95 hover:shadow-md flex items-center justify-center gap-2"
+                className="w-full bg-[#25D366] hover:bg-[#20b858] text-white font-bold py-3.5 rounded-xl transition-all active:scale-[0.98] hover:shadow-md flex items-center justify-center gap-2"
               >
                 <Send size={18} />
                 Enviar pedido por WhatsApp
               </button>
               <button 
                 onClick={toggleCart}
-                className="w-full bg-white hover:bg-abu-light text-abu-brown border-2 border-abu-cream font-bold py-3.5 rounded-xl transition-all active:scale-95 hover:shadow-sm flex items-center justify-center gap-2"
+                className="w-full bg-white hover:bg-abu-light text-abu-brown border-2 border-abu-cream font-bold py-3 rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-sm"
               >
                 Seguir Comprando
               </button>
