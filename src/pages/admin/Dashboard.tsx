@@ -181,7 +181,7 @@ export function Dashboard() {
               ) : (
                 recentProducts.map(prod => (
                   <Link key={prod.id} to={`/admin/products/edit/${prod.id}`} className="flex items-center gap-3 hover:bg-abu-light p-2 rounded-xl transition-colors">
-                    <img src={prod.imageUrl} alt={prod.name} className="w-12 h-12 rounded-lg object-cover bg-abu-cream" />
+                    {prod.imageUrl ? <img src={prod.imageUrl} alt={prod.name} className="w-12 h-12 rounded-lg object-cover bg-abu-cream shrink-0" /> : <div className="w-12 h-12 rounded-lg bg-gray-200 shrink-0" />}
                     <div className="flex-1 overflow-hidden">
                       <p className="font-bold text-sm text-gray-800 truncate">{prod.name}</p>
                       <p className="text-xs font-medium text-abu-accent">${formatPrice(prod.price)}</p>

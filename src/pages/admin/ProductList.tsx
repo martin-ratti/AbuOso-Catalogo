@@ -72,7 +72,7 @@ export function ProductList() {
             {figures.map(fig => (
               <div key={fig.id} className="py-3 sm:py-4 flex items-center justify-between gap-2 sm:gap-4">
                 <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                  {fig.imageUrl.startsWith('data:') || fig.imageUrl.startsWith('http') ? (
+                  {fig.imageUrl && (fig.imageUrl.startsWith('data:') || fig.imageUrl.startsWith('http')) ? (
                      <img src={fig.imageUrl} alt={fig.name} className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl object-cover bg-abu-cream/30 border border-abu-cream shrink-0" />
                   ) : (
                      <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 shrink-0 text-[10px] sm:text-xs text-center">Sin foto</div>
