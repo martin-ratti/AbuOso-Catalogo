@@ -107,7 +107,7 @@ export function Navbar() {
                         onClick={() => setSearchQuery('')}
                         className="flex items-center gap-3 p-3 hover:bg-abu-light transition-colors border-b border-gray-50 last:border-0"
                       >
-                        <img src={figure.imageUrl} alt={figure.name} className="w-11 h-11 rounded-xl object-cover bg-abu-cream" />
+                        {figure.imageUrl ? <img src={figure.imageUrl} alt={figure.name} className="w-11 h-11 rounded-xl object-cover bg-abu-cream" /> : <div className="w-11 h-11 rounded-xl bg-gray-200" />}
                         <div>
                           <p className="font-bold text-sm text-abu-brown">{figure.name}</p>
                           <p className="text-xs font-medium text-abu-accent">${formatPrice(figure.price)}</p>
@@ -196,7 +196,7 @@ export function Navbar() {
           ) : (
             items.map(item => (
               <div key={item.id} className="flex gap-3 items-center bg-white border border-abu-cream/80 p-2.5 sm:p-3 rounded-2xl shadow-sm">
-                <img src={item.imageUrl} alt={item.name} className="w-[72px] h-[72px] sm:w-20 sm:h-20 rounded-xl object-cover bg-abu-light shrink-0" />
+                {item.imageUrl ? <img src={item.imageUrl} alt={item.name} className="w-[72px] h-[72px] sm:w-20 sm:h-20 rounded-xl object-cover bg-abu-light shrink-0" /> : <div className="w-[72px] h-[72px] sm:w-20 sm:h-20 rounded-xl bg-gray-200 shrink-0" />}
                 <div className="flex-1 flex flex-col min-w-0">
                   <h4 className="font-bold text-sm text-abu-brown leading-tight mb-0.5 truncate">{item.name}</h4>
                   <p className="text-abu-accent text-sm font-bold mb-2">${formatPrice(item.price)}</p>
