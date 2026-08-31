@@ -103,7 +103,7 @@ export function FigureCard({ figure }: FigureCardProps) {
           </div>
         )}
 
-        <Link to={`/producto/${productSlug}`} className="block aspect-[4/5] w-full overflow-hidden bg-abu-cream/20 relative z-0">
+        <Link to={`/producto/${productSlug}`} className="block aspect-4/5 w-full overflow-hidden bg-abu-cream/20 relative z-0">
           {figure.imageUrl ? (
             <img 
               src={getOptimizedImageUrl(figure.imageUrl, 500)} 
@@ -115,7 +115,7 @@ export function FigureCard({ figure }: FigureCardProps) {
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-gray-400">Sin foto</div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
+          <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
             <span className="bg-white/95 text-abu-brown font-bold text-xs px-3 py-1.5 rounded-full shadow-md backdrop-blur-sm">Ver detalle</span>
           </div>
         </Link>

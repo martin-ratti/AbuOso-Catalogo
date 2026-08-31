@@ -108,7 +108,7 @@ export function Navbar() {
                 <div 
                   role="listbox" 
                   aria-label="Sugerencias de búsqueda"
-                  className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-abu-cream overflow-hidden z-50 max-h-[300px] overflow-y-auto"
+                  className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-abu-cream overflow-hidden z-50 max-h-75 overflow-y-auto"
                 >
                   {(() => {
                     const { figures } = useCatalogStore.getState();
@@ -150,11 +150,11 @@ export function Navbar() {
               <button 
                 onClick={toggleCart}
                 aria-label={`Abrir carrito (${getCartCount()} productos)`}
-                className="relative p-2.5 text-abu-brown hover:bg-abu-cream/50 rounded-full transition-colors flex-shrink-0 active:scale-95"
+                className="relative p-2.5 text-abu-brown hover:bg-abu-cream/50 rounded-full transition-colors shrink-0 active:scale-95"
               >
                 <ShoppingBag size={22} aria-hidden="true" />
                 {getCartCount() > 0 && (
-                  <span className="absolute top-1 right-1 bg-abu-accent text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
+                  <span className="absolute top-1 right-1 bg-abu-accent text-white text-[10px] font-bold min-w-4.5 h-4.5 flex items-center justify-center rounded-full px-1">
                     {getCartCount()}
                   </span>
                 )}
@@ -180,7 +180,7 @@ export function Navbar() {
       {/* Overlay Oscuro para el carrito */}
       {!isAdmin && isCartOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-[60] transition-opacity backdrop-blur-[2px]"
+          className="fixed inset-0 bg-black/50 z-60 transition-opacity backdrop-blur-[2px]"
           onClick={toggleCart}
         />
       )}
@@ -191,7 +191,7 @@ export function Navbar() {
           role="dialog"
           aria-modal="true"
           aria-label="Carrito de compras"
-          className={`fixed top-0 right-0 bottom-0 w-full max-w-[400px] bg-white z-[70] shadow-2xl transform transition-transform duration-300 ease-in-out will-change-transform flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}
+          className={`fixed top-0 right-0 bottom-0 w-full max-w-100 bg-white z-70 shadow-2xl transform transition-transform duration-300 ease-in-out will-change-transform flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}
         >
         <div className="p-4 flex items-center justify-between border-b border-abu-cream bg-abu-light/80">
           <div className="flex items-center gap-2.5 text-abu-brown">
@@ -226,9 +226,9 @@ export function Navbar() {
             items.map(item => (
               <div key={item.id} className="flex gap-3 items-center bg-white border border-abu-cream/80 p-2.5 sm:p-3 rounded-2xl shadow-sm">
                 {item.imageUrl ? (
-                  <img src={getOptimizedImageUrl(item.imageUrl, 160)} alt={item.name} className="w-[72px] h-[72px] sm:w-20 sm:h-20 rounded-xl object-cover bg-abu-light shrink-0" />
+                  <img src={getOptimizedImageUrl(item.imageUrl, 160)} alt={item.name} className="w-18 h-18 sm:w-20 sm:h-20 rounded-xl object-cover bg-abu-light shrink-0" />
                 ) : (
-                  <div className="w-[72px] h-[72px] sm:w-20 sm:h-20 rounded-xl bg-gray-200 shrink-0" />
+                  <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-xl bg-gray-200 shrink-0" />
                 )}
                 <div className="flex-1 flex flex-col min-w-0">
                   <h4 className="font-bold text-sm text-abu-brown leading-tight mb-0.5 truncate">{item.name}</h4>
