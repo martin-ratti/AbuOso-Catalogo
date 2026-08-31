@@ -10,6 +10,7 @@ import { handleShare } from '../utils/shareUtils';
 import { createSlug } from '../utils/slug';
 import { APP_CONFIG } from '../config/constants';
 import { formatPrice } from '../utils/format';
+import { getOptimizedImageUrl } from '../utils/cloudinary';
 
 export function ProductDetail() {
   const { id: slugId } = useParams();
@@ -85,8 +86,32 @@ export function ProductDetail() {
       setMetaTag('og:url', canonicalUrl);
       setMetaTag('og:type', 'product');
 
+      // Inyección de JSON-LD Schema.org para indexación rica en Google
+      let scriptTag = document.querySelector('script#product-schema');
+      if (!scriptTag) {
+        scriptTag = document.createElement('script');
+        scriptTag.setAttribute('id', 'product-schema');
+        scriptTag.setAttribute('type', 'application/ld+json');
+        document.head.appendChild(scriptTag);
+      }
+      scriptTag.textContent = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: figure.name,
+        image: figure.imageUrl ? [figure.imageUrl] : [],
+        description: figure.description || `Figura de yeso ${figure.name}`,
+        offers: {
+          '@type': 'Offer',
+          priceCurrency: 'ARS',
+          price: figure.price,
+          availability: figure.badge === 'agotado' ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock'
+        }
+      });
+
       return () => {
         document.title = 'AbuOso Artesanías';
+        const schema = document.querySelector('script#product-schema');
+        if (schema) schema.remove();
       };
     }
   }, [figure]);
@@ -178,7 +203,7 @@ export function ProductDetail() {
               <>
                 <img 
                   key={selectedImage}
-                  src={selectedImage} 
+                  src={getOptimizedImageUrl(selectedImage, 900)} 
                   alt={figure.name} 
                   onLoad={() => setImageLoaded(true)}
                   className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`} 
@@ -206,7 +231,7 @@ export function ProductDetail() {
                   }}
                   className={`w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-lg overflow-hidden border-2 transition-colors ${selectedImage === img ? 'border-abu-accent' : 'border-transparent hover:border-abu-cream'}`}
                 >
-                  <img src={img} alt={`Vista ${idx + 1}`} className="w-full h-full object-cover" />
+                  <img src={getOptimizedImageUrl(img, 180)} alt={`Vista ${idx + 1}`} className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
@@ -254,7 +279,7 @@ export function ProductDetail() {
                       className={`flex items-center gap-2 p-1.5 pr-3 sm:pr-4 rounded-full border-2 transition-all active:scale-95 ${isSelected ? 'border-abu-accent bg-abu-light/30' : 'border-gray-200 hover:border-abu-cream bg-white'}`}
                     >
                       {opt.imageUrl ? (
-                        <img src={opt.imageUrl} alt={opt.name} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover shadow-sm bg-abu-cream/30" />
+                        <img src={getOptimizedImageUrl(opt.imageUrl, 100)} alt={opt.name} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover shadow-sm bg-abu-cream/30" />
                       ) : (
                         <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200" />
                       )}

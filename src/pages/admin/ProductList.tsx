@@ -16,7 +16,6 @@ export function ProductList() {
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    setLoading(true);
     const q = query(collection(db, 'figures'), orderBy('createdAt', 'desc'));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {

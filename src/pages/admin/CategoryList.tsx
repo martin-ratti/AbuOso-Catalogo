@@ -15,7 +15,6 @@ export function CategoryList() {
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    setLoading(true);
     const q = query(collection(db, 'categories'), orderBy('name', 'asc'));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
