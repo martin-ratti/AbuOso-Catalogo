@@ -7,6 +7,7 @@ import { useCatalogStore } from '../store/catalogStore';
 import { createSlug } from '../utils/slug';
 import { APP_CONFIG } from '../config/constants';
 import { formatPrice } from '../utils/format';
+import { getOptimizedImageUrl } from '../utils/cloudinary';
 
 export function Navbar() {
   const location = useLocation();
@@ -24,6 +25,18 @@ export function Navbar() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [searchQuery, setSearchQuery]);
+
+  // Manejo de tecla Escape para cerrar carrito o buscador
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isCartOpen) toggleCart();
+        if (searchQuery) setSearchQuery('');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isCartOpen, toggleCart, searchQuery, setSearchQuery]);
 
   // Bloquear scroll del body cuando el carrito está abierto
   useEffect(() => {
@@ -75,26 +88,33 @@ export function Navbar() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar figuras..." 
+                aria-label="Buscar figuras en el catálogo"
                 className="w-full bg-abu-light border border-abu-cream rounded-full py-2 pl-4 pr-10 text-sm focus:outline-none focus:border-abu-accent focus:ring-2 focus:ring-abu-accent/20 transition-all text-abu-dark placeholder:text-gray-400"
               />
               {searchQuery ? (
                 <button 
                   onClick={() => setSearchQuery('')}
+                  aria-label="Limpiar búsqueda"
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-abu-accent p-0.5"
                 >
-                  <X size={16} />
+                  <X size={16} aria-hidden="true" />
                 </button>
               ) : (
-                <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true" />
               )}
               
               {/* Dropdown de Autocompletado */}
               {searchQuery.length >= 3 && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-abu-cream overflow-hidden z-50 max-h-[300px] overflow-y-auto">
+                <div 
+                  role="listbox" 
+                  aria-label="Sugerencias de búsqueda"
+                  className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-abu-cream overflow-hidden z-50 max-h-[300px] overflow-y-auto"
+                >
                   {(() => {
                     const { figures } = useCatalogStore.getState();
-                    const query = searchQuery.toLowerCase().trim();
-                    const results = figures.filter(f => f.name.toLowerCase().includes(query)).slice(0, 5);
+                    const normalize = (str: string) => str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+                    const query = normalize(searchQuery);
+                    const results = figures.filter(f => normalize(f.name).includes(query)).slice(0, 5);
                     
                     if (results.length === 0) {
                       return <div className="p-4 text-center text-sm text-gray-500">No se encontraron figuras.</div>;
@@ -107,7 +127,11 @@ export function Navbar() {
                         onClick={() => setSearchQuery('')}
                         className="flex items-center gap-3 p-3 hover:bg-abu-light transition-colors border-b border-gray-50 last:border-0"
                       >
-                        {figure.imageUrl ? <img src={figure.imageUrl} alt={figure.name} className="w-11 h-11 rounded-xl object-cover bg-abu-cream" /> : <div className="w-11 h-11 rounded-xl bg-gray-200" />}
+                        {figure.imageUrl ? (
+                          <img src={getOptimizedImageUrl(figure.imageUrl, 100)} alt={figure.name} className="w-11 h-11 rounded-xl object-cover bg-abu-cream" />
+                        ) : (
+                          <div className="w-11 h-11 rounded-xl bg-gray-200" />
+                        )}
                         <div>
                           <p className="font-bold text-sm text-abu-brown">{figure.name}</p>
                           <p className="text-xs font-medium text-abu-accent">${formatPrice(figure.price)}</p>
@@ -125,7 +149,7 @@ export function Navbar() {
               {/* Botón Carrito Global */}
               <button 
                 onClick={toggleCart}
-                aria-label="Abrir carrito"
+                aria-label={`Abrir carrito (${getCartCount()} productos)`}
                 className="relative p-2.5 text-abu-brown hover:bg-abu-cream/50 rounded-full transition-colors flex-shrink-0 active:scale-95"
               >
                 <ShoppingBag size={22} aria-hidden="true" />
@@ -163,7 +187,12 @@ export function Navbar() {
 
       {/* Sidebar del Carrito */}
       {!isAdmin && (
-        <div className={`fixed top-0 right-0 bottom-0 w-full max-w-[400px] bg-white z-[70] shadow-2xl transform transition-transform duration-300 ease-in-out will-change-transform flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div 
+          role="dialog"
+          aria-modal="true"
+          aria-label="Carrito de compras"
+          className={`fixed top-0 right-0 bottom-0 w-full max-w-[400px] bg-white z-[70] shadow-2xl transform transition-transform duration-300 ease-in-out will-change-transform flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        >
         <div className="p-4 flex items-center justify-between border-b border-abu-cream bg-abu-light/80">
           <div className="flex items-center gap-2.5 text-abu-brown">
             <ShoppingBag size={20} aria-hidden="true" />
@@ -196,19 +225,39 @@ export function Navbar() {
           ) : (
             items.map(item => (
               <div key={item.id} className="flex gap-3 items-center bg-white border border-abu-cream/80 p-2.5 sm:p-3 rounded-2xl shadow-sm">
-                {item.imageUrl ? <img src={item.imageUrl} alt={item.name} className="w-[72px] h-[72px] sm:w-20 sm:h-20 rounded-xl object-cover bg-abu-light shrink-0" /> : <div className="w-[72px] h-[72px] sm:w-20 sm:h-20 rounded-xl bg-gray-200 shrink-0" />}
+                {item.imageUrl ? (
+                  <img src={getOptimizedImageUrl(item.imageUrl, 160)} alt={item.name} className="w-[72px] h-[72px] sm:w-20 sm:h-20 rounded-xl object-cover bg-abu-light shrink-0" />
+                ) : (
+                  <div className="w-[72px] h-[72px] sm:w-20 sm:h-20 rounded-xl bg-gray-200 shrink-0" />
+                )}
                 <div className="flex-1 flex flex-col min-w-0">
                   <h4 className="font-bold text-sm text-abu-brown leading-tight mb-0.5 truncate">{item.name}</h4>
                   <p className="text-abu-accent text-sm font-bold mb-2">${formatPrice(item.price)}</p>
                   
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 bg-abu-light rounded-xl border border-abu-cream px-1 py-0.5">
-                      <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="p-1.5 text-gray-500 hover:text-abu-accent transition-colors active:scale-90"><Minus size={14} /></button>
+                      <button 
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)} 
+                        aria-label={`Disminuir cantidad de ${item.name}`}
+                        className="p-1.5 text-gray-500 hover:text-abu-accent transition-colors active:scale-90"
+                      >
+                        <Minus size={14} aria-hidden="true" />
+                      </button>
                       <span className="text-xs font-bold w-5 text-center">{item.quantity}</span>
-                      <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="p-1.5 text-gray-500 hover:text-abu-accent transition-colors active:scale-90"><Plus size={14} /></button>
+                      <button 
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)} 
+                        aria-label={`Aumentar cantidad de ${item.name}`}
+                        className="p-1.5 text-gray-500 hover:text-abu-accent transition-colors active:scale-90"
+                      >
+                        <Plus size={14} aria-hidden="true" />
+                      </button>
                     </div>
-                    <button onClick={() => removeItem(item.id)} className="text-gray-400 hover:text-red-500 p-1.5 hover:bg-red-50 rounded-full transition-colors active:scale-90">
-                      <XCircle size={18} />
+                    <button 
+                      onClick={() => removeItem(item.id)} 
+                      aria-label={`Eliminar ${item.name} del pedido`}
+                      className="text-gray-400 hover:text-red-500 p-1.5 hover:bg-red-50 rounded-full transition-colors active:scale-90"
+                    >
+                      <XCircle size={18} aria-hidden="true" />
                     </button>
                   </div>
                 </div>
@@ -228,7 +277,7 @@ export function Navbar() {
                 onClick={handleWhatsAppOrder}
                 className="w-full bg-[#25D366] hover:bg-[#20b858] text-white font-bold py-3.5 rounded-xl transition-all active:scale-[0.98] hover:shadow-md flex items-center justify-center gap-2"
               >
-                <Send size={18} />
+                <Send size={18} aria-hidden="true" />
                 Enviar pedido por WhatsApp
               </button>
               <button 

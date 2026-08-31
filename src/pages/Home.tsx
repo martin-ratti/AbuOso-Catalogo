@@ -4,6 +4,7 @@ import { FigureCardSkeleton } from '../components/FigureCardSkeleton';
 import { useCatalog } from '../hooks/useCatalog';
 import { useCategories } from '../hooks/useCategories';
 import { ChevronDown, SearchX } from 'lucide-react';
+import { getOptimizedImageUrl } from '../utils/cloudinary';
 import {
   Smile, PawPrint, TreePine, Sprout, Package, Sparkles, Star, Heart, Gift, Moon, Sun, Flower, Palette, Brush, Wand2, LayoutGrid,
   Dog, Cat, Rabbit, Bird, Fish, Bug, Leaf,
@@ -60,7 +61,7 @@ export function Home() {
         </h3>
 
         {loadingCats ? (
-          <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-3 hide-scrollbar">
+          <div aria-hidden="true" className="flex gap-2 sm:gap-3 overflow-x-auto pb-3 hide-scrollbar">
             {[1, 2, 3, 4, 5, 6, 7].map(i => (
               <div key={i} className="flex flex-col items-center justify-center min-w-[72px] sm:min-w-[100px] h-[72px] sm:h-[100px] bg-gray-100 animate-pulse rounded-xl sm:rounded-2xl shrink-0 border border-gray-200 p-3 sm:p-4">
                 <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-200 rounded-full mb-1.5 sm:mb-2" />
@@ -69,23 +70,27 @@ export function Home() {
             ))}
           </div>
         ) : (
-          <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-3 hide-scrollbar snap-x snap-mandatory">
+          <div role="tablist" aria-label="Filtrar por categoría" className="flex gap-2 sm:gap-3 overflow-x-auto pb-3 hide-scrollbar snap-x snap-mandatory">
             {categories.map((cat) => {
               const IconComponent = cat.iconName ? LOCAL_ICON_MAP[cat.iconName] : LOCAL_ICON_MAP['Package'];
+              const isActive = activeCategory === cat.name;
 
               return (
                 <button
                   key={cat.name}
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-label={`Categoría ${cat.name}`}
                   onClick={() => setActiveCategory(cat.name)}
-                  className={`flex flex-col items-center justify-center min-w-[72px] sm:min-w-[100px] p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-all duration-200 snap-center shadow-sm border shrink-0 ${activeCategory === cat.name
+                  className={`flex flex-col items-center justify-center min-w-[72px] sm:min-w-[100px] p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-all duration-200 snap-center shadow-sm border shrink-0 ${isActive
                     ? 'bg-abu-brown text-white border-abu-brown shadow-md scale-[1.03]'
                     : 'bg-white text-gray-500 hover:bg-abu-light hover:text-abu-brown border-abu-cream/80 active:scale-95'
                     }`}
                 >
                   {cat.imageUrl ? (
-                    <img src={cat.imageUrl} alt={cat.name} className="w-6 h-6 sm:w-8 sm:h-8 object-cover mb-1.5 sm:mb-2" />
+                    <img src={getOptimizedImageUrl(cat.imageUrl, 80)} alt="" aria-hidden="true" className="w-6 h-6 sm:w-8 sm:h-8 object-cover mb-1.5 sm:mb-2" />
                   ) : (
-                    IconComponent && <IconComponent size={22} className="mb-1.5 sm:mb-2 sm:!w-7 sm:!h-7" />
+                    IconComponent && <IconComponent size={22} aria-hidden="true" className="mb-1.5 sm:mb-2 sm:!w-7 sm:!h-7" />
                   )}
                   <span className="text-[11px] sm:text-sm font-bold whitespace-nowrap">{cat.name}</span>
                 </button>
