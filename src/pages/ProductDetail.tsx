@@ -199,8 +199,10 @@ export function ProductDetail() {
                 <button 
                   key={idx}
                   onClick={() => {
-                    setImageLoaded(false);
-                    setSelectedImage(img);
+                    if (selectedImage !== img) {
+                      setImageLoaded(false);
+                      setSelectedImage(img);
+                    }
                   }}
                   className={`w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-lg overflow-hidden border-2 transition-colors ${selectedImage === img ? 'border-abu-accent' : 'border-transparent hover:border-abu-cream'}`}
                 >
@@ -244,8 +246,10 @@ export function ProductDetail() {
                       key={idx}
                       onClick={() => {
                         setSelectedOption(opt);
-                        setImageLoaded(false);
-                        setSelectedImage(opt.imageUrl);
+                        if (opt.imageUrl && selectedImage !== opt.imageUrl) {
+                          setImageLoaded(false);
+                          setSelectedImage(opt.imageUrl);
+                        }
                       }}
                       className={`flex items-center gap-2 p-1.5 pr-3 sm:pr-4 rounded-full border-2 transition-all active:scale-95 ${isSelected ? 'border-abu-accent bg-abu-light/30' : 'border-gray-200 hover:border-abu-cream bg-white'}`}
                     >

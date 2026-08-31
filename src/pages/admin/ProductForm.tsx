@@ -123,6 +123,17 @@ export function ProductForm() {
     setGeneralImages(prev => prev.filter(img => img.id !== idToRemove));
   };
 
+  const handleRemoveOptionImage = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setOptions(prev => prev.map(opt => opt.id === id ? {
+      ...opt,
+      imageFile: undefined,
+      imageUrl: undefined,
+      preview: undefined
+    } : opt));
+  };
+
   const handleAddOption = () => {
     setOptions(prev => [...prev, { id: crypto.randomUUID(), name: '' }]);
   };
@@ -313,7 +324,9 @@ export function ProductForm() {
                   <button 
                     type="button" 
                     onClick={() => handleRemoveGeneralImage(img.id)}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    aria-label="Eliminar foto"
+                    title="Eliminar foto"
+                    className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-md transition-all active:scale-90 flex items-center justify-center z-10"
                   >
                     <X size={14} />
                   </button>
@@ -364,9 +377,18 @@ export function ProductForm() {
                       {opt.preview ? (
                         <>
                           <img src={opt.preview} alt={opt.name} className="w-full h-full object-cover" />
-                          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                             <Upload size={20} className="text-white" />
                           </div>
+                          <button 
+                            type="button" 
+                            onClick={(e) => handleRemoveOptionImage(opt.id, e)}
+                            aria-label="Eliminar foto de la opción"
+                            title="Eliminar foto de la opción"
+                            className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-md transition-all active:scale-90 flex items-center justify-center z-20"
+                          >
+                            <X size={12} />
+                          </button>
                         </>
                       ) : (
                         <div className="flex flex-col items-center gap-1 text-gray-400">
