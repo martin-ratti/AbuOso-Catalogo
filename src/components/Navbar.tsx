@@ -75,9 +75,9 @@ export function Navbar() {
               alt="AbuOso Logo" 
               className="w-9 h-9 sm:w-11 sm:h-11 rounded-full object-cover border-2 border-abu-cream shadow-sm" 
             />
-            <h1 className="font-extrabold text-base sm:text-xl text-abu-brown tracking-tight">
+            <span className="font-extrabold text-base sm:text-xl text-abu-brown tracking-tight">
               AbuOso <span className="font-medium text-abu-accent hidden md:inline">Artesanías</span>
-            </h1>
+            </span>
           </Link>
           
           {/* Barra de búsqueda */}

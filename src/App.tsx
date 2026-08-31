@@ -48,7 +48,7 @@ function App() {
 
         <footer className="bg-abu-brown text-abu-cream py-6 sm:py-8 text-center mt-auto relative safe-bottom">
           <div className="max-w-7xl mx-auto px-4 flex flex-col items-center gap-2.5 sm:gap-3">
-            <img src="/logo.jpg" alt="Logo" className="w-9 h-9 sm:w-10 sm:h-10 rounded-full opacity-80 mix-blend-screen" />
+            <img src="/logo.jpg" alt="Logo de AbuOso Artesanías" className="w-9 h-9 sm:w-10 sm:h-10 rounded-full opacity-80 mix-blend-screen" />
             <div className="flex flex-col items-center gap-1">
               <p className="font-semibold text-sm sm:text-base">AbuOso Artesanías</p>
               <a 
