@@ -1,6 +1,20 @@
 const CLOUD_NAME = 'dh23yepxy';
 const UPLOAD_PRESET = 'abuoso_unsigned';
 
+/**
+ * Retorna una URL optimizada de Cloudinary con formato y calidad automáticos (f_auto, q_auto).
+ * Si se especifica un ancho, redimensiona la imagen para evitar descargar bytes innecesarios.
+ */
+export function getOptimizedImageUrl(url?: string | null, width?: number): string {
+  if (!url) return '';
+  if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+    const transforms = ['f_auto', 'q_auto'];
+    if (width) transforms.push(`w_${width}`);
+    return url.replace('/upload/', `/upload/${transforms.join(',')}/`);
+  }
+  return url;
+}
+
 export async function uploadToCloudinary(file: File): Promise<string> {
   // Comprimir la imagen antes de subir
   const compressedBlob = await compressImage(file);

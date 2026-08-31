@@ -8,20 +8,25 @@ export function useCatalog(activeCategory: string) {
   const { figures, loading, error, fetchCatalog } = useCatalogStore();
   const { searchQuery } = useSearchStore();
   
+  const [prevFilter, setPrevFilter] = useState({ activeCategory, searchQuery });
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  if (prevFilter.activeCategory !== activeCategory || prevFilter.searchQuery !== searchQuery) {
+    setPrevFilter({ activeCategory, searchQuery });
+    setVisibleCount(PAGE_SIZE);
+  }
 
   // Traer datos globales una sola vez al cargar la app o componente
   useEffect(() => {
     fetchCatalog();
   }, [fetchCatalog]);
 
-  // Resetear la paginación visual si cambia el filtro o la búsqueda
-  useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
-  }, [activeCategory, searchQuery]);
-
-  // Filtramos todo en memoria para una búsqueda perfecta y súper rápida
+  // Filtramos todo en memoria para una búsqueda perfecta, instantánea e insensible a mayúsculas/acentos
   const filteredFigures = useMemo(() => {
+    const normalize = (str: string) => 
+      str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const query = normalize(searchQuery);
+
     return figures.filter(figure => {
       // 1. Filtro de Categoría
       const matchCategory = 
@@ -30,9 +35,8 @@ export function useCatalog(activeCategory: string) {
         figure.category === activeCategory;
 
       // 2. Filtro de Búsqueda Inteligente (Ignora mayúsculas/minúsculas y acentos)
-      const query = searchQuery.toLowerCase().trim();
-      const nameMatch = figure.name.toLowerCase().includes(query);
-      const descMatch = figure.description?.toLowerCase().includes(query) || false;
+      const nameMatch = normalize(figure.name).includes(query);
+      const descMatch = figure.description ? normalize(figure.description).includes(query) : false;
       const matchSearch = query === '' || nameMatch || descMatch;
 
       return matchCategory && matchSearch;
