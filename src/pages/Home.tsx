@@ -36,12 +36,17 @@ export function Home() {
 
   return (
     <main className="flex-1 max-w-7xl mx-auto w-full px-3 sm:px-4 lg:px-6 py-4 sm:py-8">
+      {/* Metadatos SEO */}
+      <title>AbuOso Artesanías | Catálogo de Figuras de Yeso Cerámico</title>
+      <meta name="description" content="Catálogo de figuras de yeso cerámico artesanales, souvenirs y decoraciones hechas a mano con amor. Envíos y pedidos personalizados." />
+      <link rel="canonical" href="https://abuoso-catalogo.web.app/" />
+
       {/* Banner Principal */}
-      <div className="bg-gradient-to-br from-abu-light via-abu-cream/30 to-[#f8e1e5]/60 rounded-2xl sm:rounded-3xl p-5 sm:p-8 lg:p-10 mb-6 sm:mb-10 flex flex-col sm:flex-row items-center justify-between border border-abu-cream/60 shadow-sm relative overflow-hidden">
+      <div className="bg-linear-to-br from-abu-light via-abu-cream/30 to-[#f8e1e5]/60 rounded-2xl sm:rounded-3xl p-5 sm:p-8 lg:p-10 mb-6 sm:mb-10 flex flex-col sm:flex-row items-center justify-between border border-abu-cream/60 shadow-sm relative overflow-hidden">
         <div className="z-10 text-center sm:text-left mb-4 sm:mb-0 max-w-xl">
-          <h2 className="text-2xl sm:text-3xl lg:text-5xl font-black text-abu-brown mb-2 sm:mb-4 tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-3xl lg:text-5xl font-black text-abu-brown mb-2 sm:mb-4 tracking-tight leading-tight">
             Arte en yeso cerámico hecho a mano
-          </h2>
+          </h1>
           <p className="text-gray-600 text-sm sm:text-base lg:text-lg hidden sm:block">
             Explora nuestro catálogo de figuras de yeso artesanales. ¡Calidad y detalle en cada pieza!
           </p>
@@ -63,7 +68,7 @@ export function Home() {
         {loadingCats ? (
           <div aria-hidden="true" className="flex gap-2 sm:gap-3 overflow-x-auto pb-3 hide-scrollbar">
             {[1, 2, 3, 4, 5, 6, 7].map(i => (
-              <div key={i} className="flex flex-col items-center justify-center min-w-[72px] sm:min-w-[100px] h-[72px] sm:h-[100px] bg-gray-100 animate-pulse rounded-xl sm:rounded-2xl shrink-0 border border-gray-200 p-3 sm:p-4">
+              <div key={i} className="flex flex-col items-center justify-center min-w-18 sm:min-w-25 h-18 sm:h-25 bg-gray-100 animate-pulse rounded-xl sm:rounded-2xl shrink-0 border border-gray-200 p-3 sm:p-4">
                 <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-200 rounded-full mb-1.5 sm:mb-2" />
                 <div className="w-12 sm:w-16 h-2.5 sm:h-3 bg-gray-200 rounded-md" />
               </div>
@@ -82,7 +87,7 @@ export function Home() {
                   aria-selected={isActive}
                   aria-label={`Categoría ${cat.name}`}
                   onClick={() => setActiveCategory(cat.name)}
-                  className={`flex flex-col items-center justify-center min-w-[72px] sm:min-w-[100px] p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-all duration-200 snap-center shadow-sm border shrink-0 ${isActive
+                  className={`flex flex-col items-center justify-center min-w-18 sm:min-w-25 p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-all duration-200 snap-center shadow-sm border shrink-0 ${isActive
                     ? 'bg-abu-brown text-white border-abu-brown shadow-md scale-[1.03]'
                     : 'bg-white text-gray-500 hover:bg-abu-light hover:text-abu-brown border-abu-cream/80 active:scale-95'
                     }`}
@@ -90,7 +95,7 @@ export function Home() {
                   {cat.imageUrl ? (
                     <img src={getOptimizedImageUrl(cat.imageUrl, 80)} alt="" aria-hidden="true" className="w-6 h-6 sm:w-8 sm:h-8 object-cover mb-1.5 sm:mb-2" />
                   ) : (
-                    IconComponent && <IconComponent size={22} aria-hidden="true" className="mb-1.5 sm:mb-2 sm:!w-7 sm:!h-7" />
+                    IconComponent && <IconComponent size={22} aria-hidden="true" className="mb-1.5 sm:mb-2 sm:w-7! sm:h-7!" />
                   )}
                   <span className="text-[11px] sm:text-sm font-bold whitespace-nowrap">{cat.name}</span>
                 </button>

@@ -189,8 +189,41 @@ export function ProductDetail() {
     effectiveOptions.push({ name: 'Personalizada', imageUrl: figure.imageUrl || '' });
   }
 
+  const productAbsoluteUrl = `https://abuoso-catalogo.web.app/producto/${productSlug}`;
+  const metaImageUrl = selectedImage ? getOptimizedImageUrl(selectedImage, 1200) : 'https://abuoso-catalogo.web.app/logo.jpg';
+  const metaDescription = figure.description || `Figura de yeso artesanal ${figure.name}. Hecha a mano con calidad y detalle en AbuOso Artesanías.`;
+
   return (
     <main className="flex-1 max-w-5xl mx-auto w-full px-3 sm:px-4 py-4 sm:py-10">
+      {/* Metadatos SEO y Open Graph dinámicos */}
+      <title>{`${figure.name} | AbuOso Artesanías`}</title>
+      <meta name="description" content={metaDescription} />
+      <link rel="canonical" href={productAbsoluteUrl} />
+      <meta property="og:title" content={`${figure.name} | AbuOso Artesanías`} />
+      <meta property="og:description" content={metaDescription} />
+      <meta property="og:image" content={metaImageUrl} />
+      <meta property="og:url" content={productAbsoluteUrl} />
+      <meta name="twitter:title" content={`${figure.name} | AbuOso Artesanías`} />
+      <meta name="twitter:description" content={metaDescription} />
+      <meta name="twitter:image" content={metaImageUrl} />
+
+      {/* Datos Estructurados Schema.org para Google (Product) */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Product",
+          "name": figure.name,
+          "description": metaDescription,
+          "image": metaImageUrl,
+          "offers": {
+            "@type": "Offer",
+            "priceCurrency": "ARS",
+            "price": figure.price,
+            "availability": figure.badge !== 'agotado' ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+          }
+        })}
+      </script>
+
       <Link to="/" className="inline-flex items-center gap-2 text-abu-brown hover:text-abu-accent mb-4 sm:mb-6 transition-colors font-medium text-sm sm:text-base">
         <ArrowLeft size={18} /> Volver
       </Link>
