@@ -1,7 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useRef, useEffect } from 'react';
-import { Search, X, ShoppingBag, Plus, Minus, Send, XCircle, ArrowLeft, Store } from 'lucide-react';
+import { Search, X, ShoppingBag, Plus, Minus, Send, XCircle, ArrowLeft, Store, Trash2 } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
+import { useToastStore } from '../store/toastStore';
 import { useSearchStore } from '../store/searchStore';
 import { useCatalogStore } from '../store/catalogStore';
 import { createSlug } from '../utils/slug';
@@ -11,7 +12,7 @@ import { getOptimizedImageUrl } from '../utils/cloudinary';
 
 export function Navbar() {
   const location = useLocation();
-  const { isCartOpen, toggleCart, items, getCartCount, getCartTotal, updateQuantity, removeItem } = useCartStore();
+  const { isCartOpen, toggleCart, items, getCartCount, getCartTotal, updateQuantity, removeItem, clearCart } = useCartStore();
   const { searchQuery, setSearchQuery } = useSearchStore();
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -58,6 +59,8 @@ export function Navbar() {
     
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
+    clearCart();
+    toggleCart();
   };
 
   const isHome = location.pathname === '/';
@@ -203,9 +206,25 @@ export function Navbar() {
               </span>
             )}
           </div>
-          <button onClick={toggleCart} aria-label="Cerrar carrito" className="p-1.5 text-gray-400 hover:text-abu-brown bg-white rounded-full border border-gray-200 transition-colors active:scale-95">
-            <X size={18} aria-hidden="true" />
-          </button>
+          <div className="flex items-center gap-2">
+            {items.length > 0 && (
+              <button 
+                onClick={() => {
+                  clearCart();
+                  useToastStore.getState().addToast('Carrito vaciado', 'info');
+                }} 
+                aria-label="Vaciar carrito" 
+                title="Vaciar carrito"
+                className="text-xs text-gray-500 hover:text-red-500 hover:bg-red-50 py-1.5 px-2.5 rounded-xl border border-transparent hover:border-red-200 transition-colors flex items-center gap-1.5 font-medium active:scale-95 cursor-pointer"
+              >
+                <Trash2 size={14} aria-hidden="true" />
+                <span>Vaciar</span>
+              </button>
+            )}
+            <button onClick={toggleCart} aria-label="Cerrar carrito" className="p-1.5 text-gray-400 hover:text-abu-brown bg-white rounded-full border border-gray-200 transition-colors active:scale-95">
+              <X size={18} aria-hidden="true" />
+            </button>
+          </div>
         </div>
         
         <div className="p-3 sm:p-4 flex-1 overflow-y-auto flex flex-col gap-3 bg-gray-50/50 cart-scrollbar">
