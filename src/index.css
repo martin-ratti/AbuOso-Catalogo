@@ -84,3 +84,34 @@ html {
   background-color: var(--color-abu-cream);
   color: var(--color-abu-brown);
 }
+
+/* Cinta de precaución para la página de mantenimiento */
+.bg-repeating-stripe {
+  background: repeating-linear-gradient(
+    -45deg,
+    #f59e0b,
+    #f59e0b 10px,
+    #1a1a1a 10px,
+    #1a1a1a 20px
+  );
+}
+
+/* Animación suave de bounce para el oso */
+@keyframes bounceSlow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-bounce-slow {
+  animation: bounceSlow 3s ease-in-out infinite;
+}
+
+/* Banner de mantenimiento pulsante */
+@keyframes maintenancePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+.animate-maintenance-pulse {
+  animation: maintenancePulse 2s ease-in-out infinite;
+}
