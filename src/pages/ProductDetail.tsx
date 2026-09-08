@@ -9,7 +9,7 @@ import { useToastStore } from '../store/toastStore';
 import { handleShare } from '../utils/shareUtils';
 import { createSlug } from '../utils/slug';
 import { APP_CONFIG } from '../config/constants';
-import { formatPrice } from '../utils/format';
+import { displayPrice, isNumericPrice } from '../utils/format';
 import { getOptimizedImageUrl } from '../utils/cloudinary';
 
 export function ProductDetail() {
@@ -102,8 +102,7 @@ export function ProductDetail() {
         description: figure.description || `Figura de yeso ${figure.name}`,
         offers: {
           '@type': 'Offer',
-          priceCurrency: 'ARS',
-          price: figure.price,
+          ...(isNumericPrice(figure.price) ? { priceCurrency: 'ARS', price: figure.price } : {}),
           availability: figure.badge === 'agotado' ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock'
         }
       });
@@ -166,7 +165,9 @@ export function ProductDetail() {
   if (selectedOption) {
     optionText = ` en color/tipo "${selectedOption.name}"`;
   }
-  const message = `¡Hola! Vengo del catálogo. Me interesa la figura '${figure.name}'${optionText} ($${formatPrice(figure.price)}). ¿Tienen stock?`;
+  const message = isNumericPrice(figure.price)
+    ? `¡Hola! Vengo del catálogo. Me interesa la figura '${figure.name}'${optionText} (${displayPrice(figure.price)}). ¿Tienen stock?`
+    : `¡Hola! Vengo del catálogo. Me interesa la figura '${figure.name}'${optionText}. ¿Me dirías el precio?`;
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
   const productSlug = createSlug(figure.name, figure.id);
@@ -177,7 +178,7 @@ export function ProductDetail() {
   const onShare = () => {
     handleShare({
       title: `AbuOso Artesanías - ${figure.name}`,
-      text: `¡Mirá esta figura: ${figure.name} a solo $${formatPrice(figure.price)}!`,
+      text: isNumericPrice(figure.price) ? `¡Mirá esta figura: ${figure.name} a solo ${displayPrice(figure.price)}!` : `¡Mirá esta figura: ${figure.name}!`,
       url: canonicalUrl
     });
   };
@@ -215,12 +216,19 @@ export function ProductDetail() {
           "name": figure.name,
           "description": metaDescription,
           "image": metaImageUrl,
-          "offers": {
-            "@type": "Offer",
-            "priceCurrency": "ARS",
-            "price": figure.price,
-            "availability": figure.badge !== 'agotado' ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
-          }
+          ...(isNumericPrice(figure.price) ? {
+            "offers": {
+              "@type": "Offer",
+              "priceCurrency": "ARS",
+              "price": figure.price,
+              "availability": figure.badge !== 'agotado' ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+            }
+          } : {
+            "offers": {
+              "@type": "Offer",
+              "availability": figure.badge !== 'agotado' ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+            }
+          })
         })}
       </script>
 
@@ -290,7 +298,7 @@ export function ProductDetail() {
           )}
           
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-abu-brown mb-1.5 sm:mb-2 pr-10 leading-tight">{figure.name}</h1>
-          <p className="text-xl sm:text-2xl font-extrabold text-abu-accent mb-4 sm:mb-6">${formatPrice(figure.price)}</p>
+          <p className="text-xl sm:text-2xl font-extrabold text-abu-accent mb-4 sm:mb-6">{displayPrice(figure.price)}</p>
           
           {/* Opciones */}
           {effectiveOptions.length > 0 && (

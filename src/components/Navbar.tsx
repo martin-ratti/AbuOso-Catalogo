@@ -1,19 +1,21 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useRef, useEffect } from 'react';
-import { Search, X, ShoppingBag, Plus, Minus, Send, XCircle, ArrowLeft, Store, Trash2 } from 'lucide-react';
+import { Search, X, ShoppingBag, Plus, Minus, Send, XCircle, ArrowLeft, Store, Trash2, Construction } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { useToastStore } from '../store/toastStore';
 import { useSearchStore } from '../store/searchStore';
 import { useCatalogStore } from '../store/catalogStore';
+import { useMaintenanceStore } from '../store/maintenanceStore';
 import { createSlug } from '../utils/slug';
 import { APP_CONFIG } from '../config/constants';
-import { formatPrice } from '../utils/format';
+import { formatPrice, displayPrice, isNumericPrice } from '../utils/format';
 import { getOptimizedImageUrl } from '../utils/cloudinary';
 
 export function Navbar() {
   const location = useLocation();
   const { isCartOpen, toggleCart, items, getCartCount, getCartTotal, updateQuantity, removeItem, clearCart } = useCartStore();
   const { searchQuery, setSearchQuery } = useSearchStore();
+  const { isMaintenanceMode } = useMaintenanceStore();
   const searchRef = useRef<HTMLDivElement>(null);
 
   // Cerrar dropdown de búsqueda al hacer clic fuera
@@ -52,10 +54,21 @@ export function Navbar() {
   const handleWhatsAppOrder = () => {
     const whatsappNumber = APP_CONFIG.WHATSAPP_NUMBER;
     let message = "¡Hola! Quisiera realizar el siguiente pedido:\n\n";
+    const hasConsultItems = items.some(item => !isNumericPrice(item.price));
     items.forEach(item => {
-      message += `- ${item.quantity}x ${item.name} ($${formatPrice(item.price * item.quantity)})\n`;
+      if (isNumericPrice(item.price)) {
+        message += `- ${item.quantity}x ${item.name} ($${formatPrice(item.price * item.quantity)})\n`;
+      } else {
+        message += `- ${item.quantity}x ${item.name} (${item.price})\n`;
+      }
     });
-    message += `\n*Total: $${formatPrice(getCartTotal())}*`;
+    const total = getCartTotal();
+    if (total > 0) {
+      message += `\n*Total: $${formatPrice(total)}*`;
+    }
+    if (hasConsultItems) {
+      message += `\n_Nota: Algunos productos requieren consultar precio._`;
+    }
     
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -137,7 +150,7 @@ export function Navbar() {
                         )}
                         <div>
                           <p className="font-bold text-sm text-abu-brown">{figure.name}</p>
-                          <p className="text-xs font-medium text-abu-accent">${formatPrice(figure.price)}</p>
+                          <p className="text-xs font-medium text-abu-accent">{displayPrice(figure.price)}</p>
                         </div>
                       </Link>
                     ));
@@ -165,9 +178,15 @@ export function Navbar() {
             </div>
           ) : (
             <div className="flex items-center gap-2 sm:gap-3">
-              <span className="hidden sm:inline-flex items-center bg-purple-100 text-purple-700 text-xs font-bold px-3 py-1.5 rounded-full border border-purple-200">
-                Modo Admin
-              </span>
+              {isMaintenanceMode ? (
+                <span className="hidden sm:inline-flex items-center bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1.5 rounded-full border border-amber-200 gap-1.5 animate-maintenance-pulse">
+                  <Construction size={14} /> Mantenimiento
+                </span>
+              ) : (
+                <span className="hidden sm:inline-flex items-center bg-purple-100 text-purple-700 text-xs font-bold px-3 py-1.5 rounded-full border border-purple-200">
+                  Modo Admin
+                </span>
+              )}
               <Link 
                 to="/" 
                 className="flex items-center gap-2 text-sm font-bold text-abu-brown hover:text-abu-accent transition-colors bg-abu-light py-2 px-3 sm:px-4 rounded-full"
@@ -251,7 +270,7 @@ export function Navbar() {
                 )}
                 <div className="flex-1 flex flex-col min-w-0">
                   <h4 className="font-bold text-sm text-abu-brown leading-tight mb-0.5 truncate">{item.name}</h4>
-                  <p className="text-abu-accent text-sm font-bold mb-2">${formatPrice(item.price)}</p>
+                  <p className="text-abu-accent text-sm font-bold mb-2">{displayPrice(item.price)}</p>
                   
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 bg-abu-light rounded-xl border border-abu-cream px-1 py-0.5">

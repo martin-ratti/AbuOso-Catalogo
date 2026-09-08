@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import { handleShare } from '../utils/shareUtils';
 import { createSlug } from '../utils/slug';
 import { APP_CONFIG } from '../config/constants';
-import { formatPrice } from '../utils/format';
+import { displayPrice, isNumericPrice } from '../utils/format';
 import { getOptimizedImageUrl } from '../utils/cloudinary';
 
 interface FigureCardProps {
@@ -48,7 +48,7 @@ export function FigureCard({ figure }: FigureCardProps) {
     e.preventDefault();
     handleShare({
       title: `AbuOso Artesanías - ${figure.name}`,
-      text: `¡Mirá esta figura: ${figure.name} a solo $${formatPrice(figure.price)}!`,
+      text: isNumericPrice(figure.price) ? `¡Mirá esta figura: ${figure.name} a solo ${displayPrice(figure.price)}!` : `¡Mirá esta figura: ${figure.name}!`,
       url: `${window.location.origin}/producto/${productSlug}`
     });
   };
@@ -73,7 +73,9 @@ export function FigureCard({ figure }: FigureCardProps) {
       useToastStore.getState().addToast(`¡${itemToAdd.name} agregado al carrito!`, 'success');
     } else if (actionModal === 'whatsapp') {
       const whatsappNumber = APP_CONFIG.WHATSAPP_NUMBER;
-      const message = `¡Hola! Vengo del catálogo. Me interesa la figura '${figure.name}' en variante "${selectedOption.name}" ($${formatPrice(figure.price)}). ¿Tienen stock?`;
+      const message = isNumericPrice(figure.price)
+        ? `¡Hola! Vengo del catálogo. Me interesa la figura '${figure.name}' en variante "${selectedOption.name}" (${displayPrice(figure.price)}). ¿Tienen stock?`
+        : `¡Hola! Vengo del catálogo. Me interesa la figura '${figure.name}' en variante "${selectedOption.name}". ¿Me dirías el precio?`;
       const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
     }
@@ -125,7 +127,7 @@ export function FigureCard({ figure }: FigureCardProps) {
             {figure.name}
           </Link>
           <span className="font-extrabold text-abu-accent text-sm sm:text-base">
-            ${formatPrice(figure.price)}
+            {displayPrice(figure.price)}
           </span>
           
           {/* Botones */}
