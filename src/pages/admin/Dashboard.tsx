@@ -1,17 +1,21 @@
 import { useAuthStore } from '../../store/authStore';
+import { useMaintenanceStore, toggleMaintenanceMode } from '../../store/maintenanceStore';
 import { Navigate, Link } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../../firebase';
-import { LogOut, PackageSearch, PlusCircle, Tags, FolderPlus, Package, Tag, ArrowRight, TrendingUp } from 'lucide-react';
+import { LogOut, PackageSearch, PlusCircle, Tags, FolderPlus, Package, Tag, ArrowRight, TrendingUp, Construction, AlertTriangle, HandMetal } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { ConfirmModal } from '../../components/ConfirmModal';
 import { collection, getCountFromServer, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import type { Figure } from '../../types';
-import { formatPrice } from '../../utils/format';
+import { displayPrice } from '../../utils/format';
 
 export function Dashboard() {
   const { user, loading } = useAuthStore();
+  const { isMaintenanceMode } = useMaintenanceStore();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isMaintenanceModalOpen, setIsMaintenanceModalOpen] = useState(false);
+  const [isTogglingMaintenance, setIsTogglingMaintenance] = useState(false);
   
   const [stats, setStats] = useState({ products: 0, categories: 0 });
   const [recentProducts, setRecentProducts] = useState<Figure[]>([]);
@@ -51,6 +55,16 @@ export function Dashboard() {
 
   const confirmLogout = () => {
     signOut(auth);
+  };
+
+  const handleMaintenanceToggle = async () => {
+    setIsTogglingMaintenance(true);
+    try {
+      await toggleMaintenanceMode(!isMaintenanceMode);
+    } finally {
+      setIsTogglingMaintenance(false);
+      setIsMaintenanceModalOpen(false);
+    }
   };
 
   const adminActions = [
@@ -97,10 +111,44 @@ export function Dashboard() {
         onCancel={() => setIsLogoutModalOpen(false)}
       />
 
+      <ConfirmModal 
+        isOpen={isMaintenanceModalOpen}
+        title={isMaintenanceMode ? '¿Desactivar mantenimiento?' : '¿Activar mantenimiento?'}
+        message={isMaintenanceMode 
+          ? 'La tienda volverá a estar visible para todos los visitantes.' 
+          : 'Los visitantes verán una pantalla de mantenimiento. Solo vos podrás acceder al panel de admin.'}
+        confirmText={isTogglingMaintenance ? 'Aplicando...' : (isMaintenanceMode ? 'Desactivar' : 'Activar Mantenimiento')}
+        onConfirm={handleMaintenanceToggle}
+        onCancel={() => setIsMaintenanceModalOpen(false)}
+      />
+
+      {/* Banner de mantenimiento activo */}
+      {isMaintenanceMode && (
+        <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl sm:rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-3 sm:gap-4 animate-maintenance-pulse shadow-md">
+          <div className="bg-amber-100 p-3 rounded-xl shrink-0">
+            <AlertTriangle size={28} className="text-amber-600" />
+          </div>
+          <div className="flex-1 text-center sm:text-left">
+            <h3 className="font-black text-amber-800 text-base sm:text-lg flex items-center gap-1.5 justify-center sm:justify-start">
+              <Construction size={20} className="text-amber-600" /> Modo Mantenimiento Activo
+            </h3>
+            <p className="text-amber-700 text-xs sm:text-sm mt-0.5">La tienda no es visible para los visitantes. Solo vos podés ver el panel.</p>
+          </div>
+          <button
+            onClick={() => setIsMaintenanceModalOpen(true)}
+            className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 px-5 rounded-xl transition-all active:scale-95 text-sm whitespace-nowrap shadow-sm"
+          >
+            Desactivar
+          </button>
+        </div>
+      )}
+
       {/* Hero Banner */}
       <div className="bg-linear-to-br from-abu-brown to-abu-dark rounded-2xl sm:rounded-3xl p-5 sm:p-8 lg:p-10 text-white shadow-lg relative overflow-hidden">
         <div className="relative z-10">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1 sm:mb-2">¡Hola, {userName}! 👋</h2>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1 sm:mb-2 flex items-center gap-2">
+              ¡Hola, {userName}! <HandMetal size={28} className="inline-block" />
+            </h2>
           <p className="text-abu-cream text-sm sm:text-lg max-w-xl opacity-90">
             Bienvenido al centro de control. Desde aquí podés administrar todo tu catálogo.
           </p>
@@ -166,6 +214,41 @@ export function Dashboard() {
             </div>
           </div>
 
+          {/* Widget Modo Mantenimiento */}
+          <div className={`p-4 sm:p-6 rounded-2xl sm:rounded-3xl border shadow-sm flex flex-col gap-3 sm:gap-4 transition-colors ${isMaintenanceMode ? 'bg-amber-50 border-amber-200' : 'bg-white border-abu-cream'}`}>
+            <div className="flex items-center gap-3 border-b border-abu-cream pb-2.5 sm:pb-3">
+              <Construction size={20} className={isMaintenanceMode ? 'text-amber-600' : 'text-gray-400'} />
+              <h3 className="font-bold text-abu-brown text-base sm:text-lg">Mantenimiento</h3>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="font-medium text-sm text-gray-700">Modo mantenimiento</p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {isMaintenanceMode ? 'La tienda está oculta' : 'La tienda está visible'}
+                </p>
+              </div>
+              
+              {/* Toggle Switch */}
+              <button
+                onClick={() => setIsMaintenanceModalOpen(true)}
+                disabled={isTogglingMaintenance}
+                className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 ${
+                  isMaintenanceMode 
+                    ? 'bg-amber-500 focus:ring-amber-400' 
+                    : 'bg-gray-300 focus:ring-gray-400'
+                }`}
+                aria-label={isMaintenanceMode ? 'Desactivar modo mantenimiento' : 'Activar modo mantenimiento'}
+              >
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform duration-300 ${
+                    isMaintenanceMode ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
+
           {/* Widget Últimos Productos */}
           <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-abu-cream shadow-sm flex flex-col gap-3 sm:gap-4">
             <div className="flex justify-between items-end border-b border-abu-cream pb-2.5 sm:pb-3">
@@ -184,7 +267,7 @@ export function Dashboard() {
                     {prod.imageUrl ? <img src={prod.imageUrl} alt={prod.name} className="w-12 h-12 rounded-lg object-cover bg-abu-cream shrink-0" /> : <div className="w-12 h-12 rounded-lg bg-gray-200 shrink-0" />}
                     <div className="flex-1 overflow-hidden">
                       <p className="font-bold text-sm text-gray-800 truncate">{prod.name}</p>
-                      <p className="text-xs font-medium text-abu-accent">${formatPrice(prod.price)}</p>
+                      <p className="text-xs font-medium text-abu-accent">{displayPrice(prod.price)}</p>
                     </div>
                     <ArrowRight size={16} className="text-gray-400" />
                   </Link>

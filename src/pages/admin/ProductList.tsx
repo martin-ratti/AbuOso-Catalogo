@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, Trash2, Edit, Plus, Loader2 } from 'lucide-react';
 import { useToastStore } from '../../store/toastStore';
 import { ConfirmModal } from '../../components/ConfirmModal';
-import { formatPrice } from '../../utils/format';
+import { displayPrice } from '../../utils/format';
 
 export function ProductList() {
   const [figures, setFigures] = useState<Figure[]>([]);
@@ -78,7 +78,7 @@ export function ProductList() {
                   )}
                   <div className="min-w-0">
                     <h3 className="font-bold text-abu-brown text-sm sm:text-base truncate">{fig.name}</h3>
-                    <p className="text-xs sm:text-sm text-gray-500 truncate">{fig.category} • ${formatPrice(fig.price)}</p>
+                    <p className="text-xs sm:text-sm text-gray-500 truncate">{fig.category} • {displayPrice(fig.price)}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">

@@ -40,6 +40,7 @@ export function ProductForm() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
+  const [priceMode, setPriceMode] = useState<'number' | 'consultar' | 'custom'>('number');
   const [category, setCategory] = useState('');
   const [badge, setBadge] = useState('');
   const [categories, setCategories] = useState<{id: string, name: string}[]>([]);
@@ -64,7 +65,18 @@ export function ProductForm() {
             const data = docSnap.data();
             setName(data.name || '');
             setDescription(data.description || '');
-            setPrice(data.price?.toString() || '');
+            if (typeof data.price === 'string') {
+              if (data.price === 'Consultar') {
+                setPriceMode('consultar');
+                setPrice('Consultar');
+              } else {
+                setPriceMode('custom');
+                setPrice(data.price);
+              }
+            } else {
+              setPriceMode('number');
+              setPrice(data.price?.toString() || '');
+            }
             setCategory(data.category || '');
             setBadge(data.badge || '');
             
@@ -163,7 +175,7 @@ export function ProductForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !price || !description) {
+    if (!name || !description || (priceMode === 'number' && !price) || (priceMode === 'custom' && !price)) {
       addToast('Por favor, completa los campos principales (nombre, precio, descripción).', 'error');
       return;
     }
@@ -206,7 +218,7 @@ export function ProductForm() {
       const docData: Record<string, unknown> = {
         name: name.trim(),
         description: description.trim(),
-        price: Number(price),
+        price: priceMode === 'number' ? Number(price) : (priceMode === 'consultar' ? 'Consultar' : price.trim()),
         category,
         badge: badge || null,
         images: finalImagesUrls,
@@ -265,14 +277,53 @@ export function ProductForm() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">Precio ($)</label>
-              <input 
-                type="number" 
-                value={price}
-                onChange={e => setPrice(e.target.value)}
-                placeholder="Ej: 1500" 
-                className="w-full bg-abu-light border border-abu-cream rounded-xl py-2.5 px-4 text-sm focus:outline-none focus:border-abu-accent"
-              />
+              <label className="block text-sm font-bold text-gray-700 mb-1">Precio</label>
+              <div className="flex gap-1.5 mb-2">
+                <button
+                  type="button"
+                  onClick={() => { setPriceMode('number'); setPrice(''); }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${priceMode === 'number' ? 'bg-abu-accent text-white shadow-sm' : 'bg-abu-light text-abu-brown hover:bg-abu-cream border border-abu-cream'}`}
+                >
+                  💲 Precio
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setPriceMode('consultar'); setPrice('Consultar'); }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${priceMode === 'consultar' ? 'bg-abu-accent text-white shadow-sm' : 'bg-abu-light text-abu-brown hover:bg-abu-cream border border-abu-cream'}`}
+                >
+                  💬 Consultar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setPriceMode('custom'); setPrice(''); }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${priceMode === 'custom' ? 'bg-abu-accent text-white shadow-sm' : 'bg-abu-light text-abu-brown hover:bg-abu-cream border border-abu-cream'}`}
+                >
+                  ✏️ Personalizado
+                </button>
+              </div>
+              {priceMode === 'number' && (
+                <input 
+                  type="number" 
+                  value={price}
+                  onChange={e => setPrice(e.target.value)}
+                  placeholder="Ej: 1500" 
+                  className="w-full bg-abu-light border border-abu-cream rounded-xl py-2.5 px-4 text-sm focus:outline-none focus:border-abu-accent"
+                />
+              )}
+              {priceMode === 'consultar' && (
+                <div className="w-full bg-amber-50 border border-amber-200 rounded-xl py-2.5 px-4 text-sm text-amber-700 font-medium">
+                  Se mostrará "Consultar" en lugar del precio
+                </div>
+              )}
+              {priceMode === 'custom' && (
+                <input 
+                  type="text" 
+                  value={price}
+                  onChange={e => setPrice(e.target.value)}
+                  placeholder="Ej: Próximamente, A convenir..." 
+                  className="w-full bg-abu-light border border-abu-cream rounded-xl py-2.5 px-4 text-sm focus:outline-none focus:border-abu-accent"
+                />
+              )}
             </div>
             
             <div>

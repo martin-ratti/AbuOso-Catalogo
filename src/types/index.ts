@@ -7,7 +7,7 @@ export interface Figure {
   id: string;
   name: string;
   description: string;
-  price: number;
+  price: number | string;
   imageUrl?: string;
   images?: string[];
   options?: FigureOption[];
