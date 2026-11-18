@@ -46,32 +46,50 @@ export function Login() {
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="flex flex-col gap-4">
-          <input 
-            type="email" 
-            placeholder="Correo electrónico" 
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-abu-light border border-abu-cream rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-abu-accent"
-            required
-          />
-          <div className="relative">
+        <form onSubmit={handleLogin} className="flex flex-col gap-4 text-left">
+          <div>
+            <label htmlFor="admin-email" className="block text-xs font-bold text-gray-700 mb-1">
+              Correo electrónico
+            </label>
             <input 
-              type={showPassword ? "text" : "password"} 
-              placeholder="Contraseña" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-abu-light border border-abu-cream rounded-xl py-3 pl-4 pr-12 text-sm focus:outline-none focus:border-abu-accent"
+              id="admin-email"
+              name="email"
+              type="email" 
+              autoComplete="username"
+              spellCheck={false}
+              placeholder="correo@ejemplo.com" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full bg-abu-light border border-abu-cream rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-abu-accent"
               required
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-abu-accent transition-colors"
-              title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-            >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
+          </div>
+          <div>
+            <label htmlFor="admin-password" className="block text-xs font-bold text-gray-700 mb-1">
+              Contraseña
+            </label>
+            <div className="relative">
+              <input 
+                id="admin-password"
+                name="password"
+                type={showPassword ? "text" : "password"} 
+                autoComplete="current-password"
+                placeholder="••••••••" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-abu-light border border-abu-cream rounded-xl py-3 pl-4 pr-12 text-sm focus:outline-none focus:border-abu-accent"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-abu-accent transition-colors p-1"
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                aria-pressed={showPassword}
+              >
+                {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
+              </button>
+            </div>
           </div>
           <button 
             type="submit"

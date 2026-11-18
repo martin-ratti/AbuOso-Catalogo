@@ -41,16 +41,6 @@ export function Navbar() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isCartOpen, toggleCart, searchQuery, setSearchQuery]);
 
-  // Bloquear scroll del body cuando el carrito está abierto
-  useEffect(() => {
-    if (isCartOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => { document.body.style.overflow = ''; };
-  }, [isCartOpen]);
-
   const handleWhatsAppOrder = () => {
     const whatsappNumber = APP_CONFIG.WHATSAPP_NUMBER;
     let message = "¡Hola! Quisiera realizar el siguiente pedido:\n\n";

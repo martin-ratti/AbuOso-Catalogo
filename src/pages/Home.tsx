@@ -53,7 +53,14 @@ export function Home() {
         </div>
         <div className="z-10 relative">
           <div className="w-24 h-24 sm:w-40 sm:h-40 lg:w-48 lg:h-48 rounded-full border-4 border-white shadow-xl overflow-hidden bg-white shrink-0">
-            <img src="/logo.jpg" alt="AbuOso Artesanías" className="w-full h-full object-cover" />
+            <img 
+              src="/logo.jpg" 
+              alt="AbuOso Artesanías" 
+              fetchPriority="high"
+              width={192}
+              height={192}
+              className="w-full h-full object-cover" 
+            />
           </div>
         </div>
         <div className="absolute top-0 right-0 w-full h-full opacity-[0.07] bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-abu-accent via-transparent to-transparent pointer-events-none" />

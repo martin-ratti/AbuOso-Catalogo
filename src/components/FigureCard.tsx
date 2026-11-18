@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Figure, FigureOption } from '../types';
 import { ShoppingCart, Share2, X } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
@@ -18,20 +18,24 @@ export function FigureCard({ figure }: FigureCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [actionModal, setActionModal] = useState<'cart' | 'whatsapp' | null>(null);
   const [selectedOption, setSelectedOption] = useState<FigureOption | null>(null);
+  const modalRef = useRef<HTMLDialogElement>(null);
   
   const addItem = useCartStore((state) => state.addItem);
 
-  // Cerrar modal al presionar Escape
+  // Manejo de diálogo nativo modal
   useEffect(() => {
-    if (!actionModal) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setActionModal(null);
-        setSelectedOption(null);
+    const dialog = modalRef.current;
+    if (!dialog) return;
+
+    if (actionModal) {
+      if (!dialog.open) {
+        dialog.showModal();
       }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    } else {
+      if (dialog.open) {
+        dialog.close();
+      }
+    }
   }, [actionModal]);
   
   const badgeConfig = {
@@ -160,20 +164,30 @@ export function FigureCard({ figure }: FigureCardProps) {
         </div>
       </div>
 
-      {/* Modal de variantes */}
+      {/* Modal de variantes nativo con dialog */}
       {actionModal && (
-        <div 
-          role="dialog"
-          aria-modal="true"
+        <dialog 
+          ref={modalRef}
           aria-labelledby="variant-modal-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          onClose={() => {
+            setActionModal(null);
+            setSelectedOption(null);
+          }}
+          onClick={(e) => {
+            if (e.target === modalRef.current) {
+              setActionModal(null);
+              setSelectedOption(null);
+            }
+          }}
+          className="m-auto rounded-3xl w-[calc(100%-2rem)] max-w-sm overflow-hidden shadow-2xl p-0 bg-white backdrop:bg-black/50 backdrop:backdrop-blur-xs flex flex-col max-h-[90vh] border-0"
         >
-          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden flex flex-col max-h-[90vh]">
             <div className="p-4 flex items-center justify-between border-b border-gray-100">
               <h3 id="variant-modal-title" className="font-bold text-lg text-abu-brown">
                 {actionModal === 'cart' ? 'Agregar al carrito' : 'Pedir por WhatsApp'}
               </h3>
               <button 
+                type="button"
                 onClick={() => {
                   setActionModal(null);
                   setSelectedOption(null);
@@ -192,6 +206,7 @@ export function FigureCard({ figure }: FigureCardProps) {
                 {effectiveOptions.map((opt, idx) => (
                   <button
                     key={idx}
+                    type="button"
                     onClick={() => setSelectedOption(opt)}
                     className={`flex items-center gap-3 p-3 rounded-2xl border-2 transition-all active:scale-[0.98] ${
                       selectedOption?.name === opt.name 
@@ -200,7 +215,13 @@ export function FigureCard({ figure }: FigureCardProps) {
                     }`}
                   >
                     {opt.imageUrl ? (
-                      <img src={getOptimizedImageUrl(opt.imageUrl, 150)} alt={opt.name} className="w-12 h-12 rounded-xl object-cover bg-abu-cream/30" />
+                      <img 
+                        src={getOptimizedImageUrl(opt.imageUrl, 150)} 
+                        alt={opt.name} 
+                        loading="lazy"
+                        fetchPriority="low"
+                        className="w-12 h-12 rounded-xl object-cover bg-abu-cream/30" 
+                      />
                     ) : (
                       <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-xs text-gray-400">Sin foto</div>
                     )}
@@ -214,6 +235,7 @@ export function FigureCard({ figure }: FigureCardProps) {
 
             <div className="p-4 bg-gray-50 border-t border-gray-100">
               <button
+                type="button"
                 disabled={!selectedOption}
                 onClick={handleActionConfirm}
                 className={`w-full font-bold py-3.5 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 ${
@@ -230,7 +252,7 @@ export function FigureCard({ figure }: FigureCardProps) {
               </button>
             </div>
           </div>
-        </div>
+        </dialog>
       )}
     </>
   );
