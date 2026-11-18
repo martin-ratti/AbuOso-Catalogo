@@ -17,6 +17,7 @@ export function Navbar() {
   const { searchQuery, setSearchQuery } = useSearchStore();
   const { isMaintenanceMode } = useMaintenanceStore();
   const searchRef = useRef<HTMLDivElement>(null);
+  const cartDialogRef = useRef<HTMLDialogElement>(null);
 
   // Cerrar dropdown de búsqueda al hacer clic fuera
   useEffect(() => {
@@ -29,17 +30,64 @@ export function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [searchQuery, setSearchQuery]);
 
-  // Manejo de tecla Escape para cerrar carrito o buscador
+  // Manejo de tecla Escape para limpiar el buscador
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (isCartOpen) toggleCart();
-        if (searchQuery) setSearchQuery('');
+      if (e.key === 'Escape' && searchQuery && !isCartOpen) {
+        setSearchQuery('');
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isCartOpen, toggleCart, searchQuery, setSearchQuery]);
+  }, [isCartOpen, searchQuery, setSearchQuery]);
+
+  // Sincronizar estado de apertura del drawer nativo <dialog>
+  useEffect(() => {
+    const dialog = cartDialogRef.current;
+    if (!dialog) return;
+
+    if (isCartOpen) {
+      if (!dialog.open) {
+        dialog.showModal();
+      }
+    } else if (dialog.open) {
+      dialog.close();
+    }
+  }, [isCartOpen]);
+
+  // Fallback de light-dismiss para navegadores sin <dialog closedby="any">
+  useEffect(() => {
+    const dialog = cartDialogRef.current;
+    if (!dialog || 'closedBy' in HTMLDialogElement.prototype) return;
+
+    const isOutside = (e: PointerEvent) => {
+      const rect = dialog.getBoundingClientRect();
+      return (
+        e.clientX < rect.left ||
+        e.clientX > rect.right ||
+        e.clientY < rect.top ||
+        e.clientY > rect.bottom
+      );
+    };
+
+    let pressedOutside = false;
+    const handlePointerDown = (e: PointerEvent) => {
+      pressedOutside = isOutside(e);
+    };
+    const handlePointerUp = (e: PointerEvent) => {
+      if (pressedOutside && isOutside(e) && dialog.open) {
+        dialog.close();
+      }
+      pressedOutside = false;
+    };
+
+    dialog.addEventListener('pointerdown', handlePointerDown);
+    dialog.addEventListener('pointerup', handlePointerUp);
+    return () => {
+      dialog.removeEventListener('pointerdown', handlePointerDown);
+      dialog.removeEventListener('pointerup', handlePointerUp);
+    };
+  }, []);
 
   const handleWhatsAppOrder = () => {
     const whatsappNumber = APP_CONFIG.WHATSAPP_NUMBER;
@@ -155,6 +203,8 @@ export function Navbar() {
               {/* Botón Carrito Global */}
               <button 
                 onClick={toggleCart}
+                aria-expanded={isCartOpen}
+                aria-controls="cart-drawer"
                 aria-label={`Abrir carrito (${getCartCount()} productos)`}
                 className="relative p-2.5 text-abu-brown hover:bg-abu-cream/50 rounded-full transition-colors shrink-0 active:scale-95"
               >
@@ -189,21 +239,19 @@ export function Navbar() {
         </div>
       </header>
 
-      {/* Overlay Oscuro para el carrito */}
-      {!isAdmin && isCartOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-60 transition-opacity backdrop-blur-[2px]"
-          onClick={toggleCart}
-        />
-      )}
-
       {/* Sidebar del Carrito */}
       {!isAdmin && (
-        <div 
-          role="dialog"
-          aria-modal="true"
+        <dialog
+          ref={cartDialogRef}
+          id="cart-drawer"
           aria-label="Carrito de compras"
-          className={`fixed top-0 right-0 bottom-0 w-full max-w-100 bg-white z-70 shadow-2xl transform transition-transform duration-300 ease-in-out will-change-transform flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}
+          onClose={() => {
+            if (useCartStore.getState().isCartOpen) {
+              toggleCart();
+            }
+          }}
+          {...({ closedby: 'any' } as Record<string, string>)}
+          className="cart-drawer fixed inset-y-0 right-0 left-auto m-0 p-0 border-0 w-full max-w-100 h-dvh max-h-none bg-white shadow-2xl flex-col"
         >
         <div className="p-4 flex items-center justify-between border-b border-abu-cream bg-abu-light/80">
           <div className="flex items-center gap-2.5 text-abu-brown">
@@ -317,7 +365,7 @@ export function Navbar() {
             </div>
           </div>
         )}
-      </div>
+        </dialog>
       )}
     </>
   );
