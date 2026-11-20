@@ -1,10 +1,9 @@
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import type { Firestore } from "firebase/firestore";
 
-// Your web app's Firebase configuration
+// Configuración de Firebase para la aplicación web
 const firebaseConfig = {
   apiKey: "AIzaSyB2gEnM47aj0-SiIDOypRL5xhtPg3Ialco",
   authDomain: "abuoso-catalogo.firebaseapp.com",
@@ -15,11 +14,21 @@ const firebaseConfig = {
   measurementId: "G-ZWBLM52694"
 };
 
-// Initialize Firebase
+// Inicializar Firebase
 const app = initializeApp(firebaseConfig);
-export const analytics = getAnalytics(app);
 
-// Exportar los servicios que vamos a utilizar para las figuras de yeso
-export const db = getFirestore(app);
-export const storage = getStorage(app);
+function createFirestoreDb(): Firestore {
+  try {
+    return initializeFirestore(app, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager(),
+      }),
+    });
+  } catch {
+    return getFirestore(app);
+  }
+}
+
+// Exportar servicios utilizados en la aplicación
+export const db = createFirestoreDb();
 export const auth = getAuth(app);

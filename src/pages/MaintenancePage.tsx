@@ -15,8 +15,10 @@ export function MaintenancePage() {
         {/* Oso trabajador */}
         <div className="w-48 h-48 sm:w-64 sm:h-64 mb-6 sm:mb-8 animate-bounce-slow">
           <img
-            src="/maintenance-bear.jpg"
+            src="/maintenance-bear.webp"
             alt="Oso trabajador de AbuOso Artesanías"
+            width={256}
+            height={256}
             className="w-full h-full object-contain drop-shadow-lg"
           />
         </div>
@@ -76,14 +78,15 @@ export function MaintenancePage() {
       {/* Botón oculto de acceso admin — posicionado en la esquina inferior derecha */}
       <Link
         to="/admin"
-        className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 text-gray-300 hover:text-abu-accent transition-colors p-2 rounded-full hover:bg-white/50"
+        aria-label="Acceso administrador"
+        className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 text-gray-500 hover:text-abu-accent transition-colors p-2 rounded-full hover:bg-white/50"
         title="Acceso administrador"
       >
-        <Lock size={16} />
+        <Lock size={16} aria-hidden="true" />
       </Link>
 
       {/* Créditos */}
-      <p className="absolute bottom-4 text-[10px] text-gray-300">
+      <p className="absolute bottom-4 text-[10px] text-gray-500">
         © {new Date().getFullYear()} AbuOso Artesanías
       </p>
     </div>
