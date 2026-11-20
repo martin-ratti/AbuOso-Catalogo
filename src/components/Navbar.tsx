@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
-import { useRef, useEffect } from 'react';
-import { Search, X, ShoppingBag, Plus, Minus, Send, XCircle, ArrowLeft, Store, Trash2, Construction } from 'lucide-react';
+import { useRef, useEffect, useState } from 'react';
+import { Search, X, ShoppingBag, Plus, Minus, Send, XCircle, ArrowLeft, Store, Trash2, Construction, CheckCircle2 } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { useToastStore } from '../store/toastStore';
 import { useSearchStore } from '../store/searchStore';
@@ -16,30 +16,32 @@ export function Navbar() {
   const { isCartOpen, toggleCart, items, getCartCount, getCartTotal, updateQuantity, removeItem, clearCart } = useCartStore();
   const { searchQuery, setSearchQuery } = useSearchStore();
   const { isMaintenanceMode } = useMaintenanceStore();
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [orderSentPendingClear, setOrderSentPendingClear] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const cartDialogRef = useRef<HTMLDialogElement>(null);
 
-  // Cerrar dropdown de búsqueda al hacer clic fuera
+  // Cerrar solo el dropdown de sugerencias al hacer clic fuera (sin borrar el texto buscado)
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
-        if (searchQuery.length >= 3) setSearchQuery('');
+        setIsSearchOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [searchQuery, setSearchQuery]);
+  }, []);
 
-  // Manejo de tecla Escape para limpiar el buscador
+  // Manejo de tecla Escape para cerrar el desplegable de búsqueda
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && searchQuery && !isCartOpen) {
-        setSearchQuery('');
+      if (e.key === 'Escape' && isSearchOpen && !isCartOpen) {
+        setIsSearchOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isCartOpen, searchQuery, setSearchQuery]);
+  }, [isCartOpen, isSearchOpen]);
 
   // Sincronizar estado de apertura del drawer nativo <dialog>
   useEffect(() => {
@@ -89,10 +91,13 @@ export function Navbar() {
     };
   }, []);
 
+  const hasConsultItems = items.some(item => !isNumericPrice(item.price));
+  const hasNumericItems = items.some(item => isNumericPrice(item.price));
+  const cartTotal = getCartTotal();
+
   const handleWhatsAppOrder = () => {
     const whatsappNumber = APP_CONFIG.WHATSAPP_NUMBER;
     let message = "¡Hola! Quisiera realizar el siguiente pedido:\n\n";
-    const hasConsultItems = items.some(item => !isNumericPrice(item.price));
     items.forEach(item => {
       if (isNumericPrice(item.price)) {
         message += `- ${item.quantity}x ${item.name} ($${formatPrice(item.price * item.quantity)})\n`;
@@ -100,18 +105,18 @@ export function Navbar() {
         message += `- ${item.quantity}x ${item.name} (${item.price})\n`;
       }
     });
-    const total = getCartTotal();
-    if (total > 0) {
-      message += `\n*Total: $${formatPrice(total)}*`;
+    if (cartTotal > 0) {
+      message += `\n*Total: $${formatPrice(cartTotal)}*`;
+    } else if (hasConsultItems) {
+      message += `\n*Total: A consultar*`;
     }
     if (hasConsultItems) {
       message += `\n_Nota: Algunos productos requieren consultar precio._`;
     }
     
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-    clearCart();
-    toggleCart();
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+    setOrderSentPendingClear(true);
   };
 
   const isHome = location.pathname === '/';
@@ -140,25 +145,32 @@ export function Navbar() {
               <input 
                 type="text" 
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsSearchOpen(true)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setIsSearchOpen(true);
+                }}
                 placeholder="Buscar figuras..." 
                 aria-label="Buscar figuras en el catálogo"
-                className="w-full bg-abu-light border border-abu-cream rounded-full py-2 pl-4 pr-10 text-sm focus:outline-none focus:border-abu-accent focus:ring-2 focus:ring-abu-accent/20 transition-all text-abu-dark placeholder:text-gray-400"
+                className="w-full bg-abu-light border border-abu-cream rounded-full py-2 pl-4 pr-10 text-sm focus:outline-none focus:border-abu-accent focus:ring-2 focus:ring-abu-accent/20 transition-all text-abu-dark placeholder:text-gray-500"
               />
               {searchQuery ? (
                 <button 
-                  onClick={() => setSearchQuery('')}
+                  onClick={() => {
+                    setSearchQuery('');
+                    setIsSearchOpen(false);
+                  }}
                   aria-label="Limpiar búsqueda"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-abu-accent p-0.5"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-abu-accent p-0.5"
                 >
                   <X size={16} aria-hidden="true" />
                 </button>
               ) : (
-                <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+                <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500" aria-hidden="true" />
               )}
               
               {/* Dropdown de Autocompletado */}
-              {searchQuery.length >= 3 && (
+              {isSearchOpen && searchQuery.length >= 3 && (
                 <div 
                   role="listbox" 
                   aria-label="Sugerencias de búsqueda"
@@ -171,14 +183,14 @@ export function Navbar() {
                     const results = figures.filter(f => normalize(f.name).includes(query)).slice(0, 5);
                     
                     if (results.length === 0) {
-                      return <div className="p-4 text-center text-sm text-gray-500">No se encontraron figuras.</div>;
+                      return <div className="p-4 text-center text-sm text-gray-600">No se encontraron figuras.</div>;
                     }
                     
                     return results.map(figure => (
                       <Link 
                         key={figure.id} 
                         to={`/producto/${createSlug(figure.name, figure.id)}`}
-                        onClick={() => setSearchQuery('')}
+                        onClick={() => setIsSearchOpen(false)}
                         className="flex items-center gap-3 p-3 hover:bg-abu-light transition-colors border-b border-gray-50 last:border-0"
                       >
                         {figure.imageUrl ? (
@@ -268,6 +280,7 @@ export function Navbar() {
               <button 
                 onClick={() => {
                   clearCart();
+                  setOrderSentPendingClear(false);
                   useToastStore.getState().addToast('Carrito vaciado', 'info');
                 }} 
                 aria-label="Vaciar carrito" 
@@ -344,10 +357,50 @@ export function Navbar() {
 
         {items.length > 0 && (
           <div className="p-3 sm:p-4 border-t border-abu-cream bg-white shadow-[0_-4px_12px_-2px_rgba(0,0,0,0.06)] safe-bottom">
-            <div className="flex justify-between items-center mb-3 bg-abu-light p-3 rounded-xl border border-abu-cream">
-              <span className="text-gray-600 font-bold text-sm">Total estimado:</span>
-              <span className="text-xl sm:text-2xl font-black text-abu-brown">${formatPrice(getCartTotal())}</span>
+            <div className="flex flex-col gap-1 mb-3 bg-abu-light p-3 rounded-xl border border-abu-cream">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 font-bold text-sm">Total estimado:</span>
+                <span className="text-xl sm:text-2xl font-black text-abu-brown">
+                  {hasNumericItems ? `$${formatPrice(cartTotal)}` : 'A consultar'}
+                </span>
+              </div>
+              {hasNumericItems && hasConsultItems && (
+                <p className="text-xs text-amber-700 font-medium text-right">
+                  + productos a consultar
+                </p>
+              )}
             </div>
+
+            {orderSentPendingClear && (
+              <div className="mb-3 p-3 rounded-xl bg-emerald-50 border border-emerald-200 flex flex-col gap-2">
+                <p className="text-xs text-emerald-800 font-medium flex items-center gap-1.5">
+                  <CheckCircle2 size={16} className="text-emerald-600 shrink-0" aria-hidden="true" />
+                  ¿Ya enviaste tu pedido por WhatsApp?
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clearCart();
+                      setOrderSentPendingClear(false);
+                      toggleCart();
+                      useToastStore.getState().addToast('¡Pedido finalizado y carrito vaciado!', 'success');
+                    }}
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 px-3 rounded-lg transition-colors"
+                  >
+                    Sí, vaciar carrito
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOrderSentPendingClear(false)}
+                    className="bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 text-xs font-semibold py-2 px-3 rounded-lg transition-colors"
+                  >
+                    Conservar
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="flex flex-col gap-2">
               <button 
                 onClick={handleWhatsAppOrder}

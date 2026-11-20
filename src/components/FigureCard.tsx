@@ -12,15 +12,27 @@ import { getOptimizedImageUrl } from '../utils/cloudinary';
 
 interface FigureCardProps {
   figure: Figure;
+  priority?: boolean;
 }
 
-export function FigureCard({ figure }: FigureCardProps) {
+export function FigureCard({ figure, priority = false }: FigureCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [actionModal, setActionModal] = useState<'cart' | 'whatsapp' | null>(null);
   const [selectedOption, setSelectedOption] = useState<FigureOption | null>(null);
   const modalRef = useRef<HTMLDialogElement>(null);
   
   const addItem = useCartStore((state) => state.addItem);
+
+  const hasCustom = figure.options?.some(o => o.name.toLowerCase() === 'personalizada');
+  const effectiveOptions = figure.options ? [...figure.options] : [];
+  if (!hasCustom) {
+    effectiveOptions.push({ name: 'Personalizada', imageUrl: figure.imageUrl || '' });
+  }
+
+  const openActionModal = (mode: 'cart' | 'whatsapp') => {
+    setActionModal(mode);
+    setSelectedOption(effectiveOptions.length === 1 ? effectiveOptions[0] : null);
+  };
 
   // Manejo de diálogo nativo modal
   useEffect(() => {
@@ -57,12 +69,6 @@ export function FigureCard({ figure }: FigureCardProps) {
     });
   };
 
-  const hasCustom = figure.options?.some(o => o.name.toLowerCase() === 'personalizada');
-  const effectiveOptions = figure.options ? [...figure.options] : [];
-  if (!hasCustom) {
-    effectiveOptions.push({ name: 'Personalizada', imageUrl: figure.imageUrl || '' });
-  }
-
   const handleActionConfirm = () => {
     if (!selectedOption) return;
 
@@ -81,7 +87,7 @@ export function FigureCard({ figure }: FigureCardProps) {
         ? `¡Hola! Vengo del catálogo. Me interesa la figura '${figure.name}' en variante "${selectedOption.name}" (${displayPrice(figure.price)}). ¿Tienen stock?`
         : `¡Hola! Vengo del catálogo. Me interesa la figura '${figure.name}' en variante "${selectedOption.name}". ¿Me dirías el precio?`;
       const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
+      window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
     }
     
     setActionModal(null);
@@ -92,11 +98,11 @@ export function FigureCard({ figure }: FigureCardProps) {
     <>
       <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg overflow-hidden border border-abu-cream/80 transition-all duration-300 hover:-translate-y-1 flex flex-col relative group">
         
-        {/* Botón de Compartir */}
+        {/* Botón de Compartir: siempre visible en móviles/táctiles, en desktop aparece al pasar el mouse o enfocar */}
         <button 
           onClick={onShare}
           aria-label={`Compartir ${figure.name}`}
-          className="absolute top-2 left-2 z-20 bg-white/90 backdrop-blur-sm p-1.5 rounded-full text-gray-500 hover:text-abu-accent hover:bg-white shadow-sm transition-all active:scale-90 opacity-0 group-hover:opacity-100 sm:opacity-100"
+          className="absolute top-2 left-2 z-20 bg-white/90 backdrop-blur-sm p-1.5 rounded-full text-gray-600 hover:text-abu-accent hover:bg-white shadow-sm transition-all active:scale-90 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
           title="Compartir"
         >
           <Share2 size={14} aria-hidden="true" />
@@ -116,10 +122,11 @@ export function FigureCard({ figure }: FigureCardProps) {
               alt={figure.name} 
               onLoad={() => setImageLoaded(true)}
               className={`w-full h-full object-cover transition-all duration-500 ${!imageLoaded ? 'opacity-0 scale-105' : figure.badge === 'agotado' ? 'grayscale opacity-50' : 'opacity-100 scale-100'} group-hover:scale-105`}
-              loading="lazy"
+              loading={priority ? undefined : 'lazy'}
+              fetchPriority={priority ? 'high' : undefined}
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-gray-400">Sin foto</div>
+            <div className="absolute inset-0 flex items-center justify-center text-gray-500">Sin foto</div>
           )}
           <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
             <span className="bg-white/95 text-abu-brown font-bold text-xs px-3 py-1.5 rounded-full shadow-md backdrop-blur-sm">Ver detalle</span>
@@ -139,7 +146,7 @@ export function FigureCard({ figure }: FigureCardProps) {
             {/* Botón Carrito */}
             <button 
               disabled={figure.badge === 'agotado'}
-              onClick={() => setActionModal('cart')}
+              onClick={() => openActionModal('cart')}
               aria-label={`Agregar ${figure.name} al carrito`}
               className="w-full bg-abu-light hover:bg-abu-cream text-abu-brown border border-abu-cream font-semibold py-2 rounded-xl text-xs transition-all active:scale-95 hover:shadow-sm flex items-center justify-center gap-1 disabled:opacity-40 disabled:active:scale-100 disabled:hover:shadow-none"
               title="Agregar al carrito"
@@ -152,7 +159,7 @@ export function FigureCard({ figure }: FigureCardProps) {
             {/* Botón WhatsApp */}
             <button 
               disabled={figure.badge === 'agotado'}
-              onClick={() => setActionModal('whatsapp')}
+              onClick={() => openActionModal('whatsapp')}
               aria-label={`Pedir ${figure.name} por WhatsApp`}
               className="w-full bg-[#25D366] hover:bg-[#20b858] text-white font-semibold py-2 rounded-xl text-xs transition-all active:scale-95 hover:shadow-sm flex items-center justify-center gap-1 disabled:opacity-40 disabled:active:scale-100 disabled:hover:shadow-none"
               title="Pedir por WhatsApp"

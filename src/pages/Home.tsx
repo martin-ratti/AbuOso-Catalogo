@@ -3,6 +3,7 @@ import { FigureCard } from '../components/FigureCard';
 import { FigureCardSkeleton } from '../components/FigureCardSkeleton';
 import { useCatalog } from '../hooks/useCatalog';
 import { useCategories } from '../hooks/useCategories';
+import { useSearchStore } from '../store/searchStore';
 import { ChevronDown, SearchX } from 'lucide-react';
 import { getOptimizedImageUrl } from '../utils/cloudinary';
 import {
@@ -29,6 +30,7 @@ const LOCAL_ICON_MAP: Record<string, React.ElementType> = {
 
 export function Home() {
   const [activeCategory, setActiveCategory] = useState('Todos');
+  const setSearchQuery = useSearchStore((state) => state.setSearchQuery);
 
   // Custom hooks
   const { categories, loadingCats } = useCategories();
@@ -68,9 +70,9 @@ export function Home() {
 
       {/* Categorías */}
       <div className="mb-6 sm:mb-10">
-        <h3 className="text-base sm:text-xl font-bold text-abu-brown mb-3 sm:mb-4 flex items-center gap-2">
+        <h2 className="text-base sm:text-xl font-bold text-abu-brown mb-3 sm:mb-4 flex items-center gap-2">
           Categorías
-        </h3>
+        </h2>
 
         {loadingCats ? (
           <div aria-hidden="true" className="flex gap-2 sm:gap-3 overflow-x-auto pb-3 hide-scrollbar">
@@ -127,8 +129,8 @@ export function Home() {
       ) : figures.length > 0 ? (
         <>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-4 lg:gap-5 mb-8">
-            {figures.map(figure => (
-              <FigureCard key={figure.id} figure={figure} />
+            {figures.map((figure, idx) => (
+              <FigureCard key={figure.id} figure={figure} priority={idx < 2} />
             ))}
           </div>
 
@@ -149,9 +151,12 @@ export function Home() {
           <div className="flex justify-center mb-5 text-abu-cream/80">
             <SearchX size={56} strokeWidth={1.5} />
           </div>
-          <p className="text-gray-500 font-medium">No hay figuras que coincidan con tu búsqueda.</p>
+          <p className="text-gray-600 font-medium">No hay figuras que coincidan con tu búsqueda.</p>
           <button 
-            onClick={() => setActiveCategory('Todos')}
+            onClick={() => {
+              setActiveCategory('Todos');
+              setSearchQuery('');
+            }}
             className="mt-4 text-abu-accent hover:text-abu-brown font-bold text-sm transition-colors"
           >
             Ver todas las figuras
