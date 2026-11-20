@@ -38,7 +38,7 @@ export function Login() {
   return (
     <div className="flex-1 flex items-center justify-center p-3 sm:p-4">
       <div className="bg-white p-6 sm:p-8 rounded-2xl sm:rounded-3xl shadow-sm border border-abu-cream w-full max-w-sm text-center">
-        <h2 className="text-xl sm:text-2xl font-bold text-abu-brown mb-5 sm:mb-6">Acceso Admin</h2>
+        <h1 className="text-xl sm:text-2xl font-bold text-abu-brown mb-5 sm:mb-6">Acceso Admin</h1>
         
         {error && (
           <div className="bg-red-50 text-red-500 text-sm p-3 rounded-lg mb-4 border border-red-100">
@@ -83,7 +83,7 @@ export function Login() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-abu-accent transition-colors p-1"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-abu-accent transition-colors p-1"
                 aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                 aria-pressed={showPassword}
               >
@@ -100,7 +100,7 @@ export function Login() {
           </button>
         </form>
         
-        <p className="text-xs text-gray-400 mt-6">
+        <p className="text-xs text-gray-500 mt-6">
           Esta sección es de uso exclusivo para la administración de AbuOso Artesanías.
         </p>
       </div>

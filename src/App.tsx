@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 import { Navbar } from './components/Navbar';
 import { Home } from './pages/Home';
@@ -7,6 +7,7 @@ import { NotFound } from './pages/NotFound';
 import { MaintenancePage } from './pages/MaintenancePage';
 import { ToastContainer } from './components/ToastContainer';
 import { useMaintenanceStore } from './store/maintenanceStore';
+import { useAuthStore } from './store/authStore';
 import { Lock, Loader2 } from 'lucide-react';
 
 // Lazy load de las páginas de admin (no las descarga el cliente que solo mira el catálogo)
@@ -25,29 +26,32 @@ function AdminFallback() {
   );
 }
 
+function RequireAdminAuth({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuthStore();
+  if (loading) return <AdminFallback />;
+  if (!user) return <Navigate to="/admin" replace />;
+  return <>{children}</>;
+}
+
 function App() {
-  const { isMaintenanceMode, loading: maintenanceLoading } = useMaintenanceStore();
+  const { isMaintenanceMode } = useMaintenanceStore();
 
   return (
     <BrowserRouter>
       <Routes>
         {/* Rutas Admin - SIEMPRE accesibles, incluso en mantenimiento */}
         <Route path="/admin" element={<AdminLayout><Suspense fallback={<AdminFallback />}><Login /></Suspense></AdminLayout>} />
-        <Route path="/admin/dashboard" element={<AdminLayout><Suspense fallback={<AdminFallback />}><Dashboard /></Suspense></AdminLayout>} />
-        <Route path="/admin/products" element={<AdminLayout><Suspense fallback={<AdminFallback />}><ProductList /></Suspense></AdminLayout>} />
-        <Route path="/admin/products/new" element={<AdminLayout><Suspense fallback={<AdminFallback />}><ProductForm /></Suspense></AdminLayout>} />
-        <Route path="/admin/products/edit/:id" element={<AdminLayout><Suspense fallback={<AdminFallback />}><ProductForm /></Suspense></AdminLayout>} />
-        <Route path="/admin/categories" element={<AdminLayout><Suspense fallback={<AdminFallback />}><CategoryList /></Suspense></AdminLayout>} />
-        <Route path="/admin/categories/new" element={<AdminLayout><Suspense fallback={<AdminFallback />}><CategoryForm /></Suspense></AdminLayout>} />
-        <Route path="/admin/categories/edit/:id" element={<AdminLayout><Suspense fallback={<AdminFallback />}><CategoryForm /></Suspense></AdminLayout>} />
+        <Route path="/admin/dashboard" element={<AdminLayout><RequireAdminAuth><Suspense fallback={<AdminFallback />}><Dashboard /></Suspense></RequireAdminAuth></AdminLayout>} />
+        <Route path="/admin/products" element={<AdminLayout><RequireAdminAuth><Suspense fallback={<AdminFallback />}><ProductList /></Suspense></RequireAdminAuth></AdminLayout>} />
+        <Route path="/admin/products/new" element={<AdminLayout><RequireAdminAuth><Suspense fallback={<AdminFallback />}><ProductForm /></Suspense></RequireAdminAuth></AdminLayout>} />
+        <Route path="/admin/products/edit/:id" element={<AdminLayout><RequireAdminAuth><Suspense fallback={<AdminFallback />}><ProductForm /></Suspense></RequireAdminAuth></AdminLayout>} />
+        <Route path="/admin/categories" element={<AdminLayout><RequireAdminAuth><Suspense fallback={<AdminFallback />}><CategoryList /></Suspense></RequireAdminAuth></AdminLayout>} />
+        <Route path="/admin/categories/new" element={<AdminLayout><RequireAdminAuth><Suspense fallback={<AdminFallback />}><CategoryForm /></Suspense></RequireAdminAuth></AdminLayout>} />
+        <Route path="/admin/categories/edit/:id" element={<AdminLayout><RequireAdminAuth><Suspense fallback={<AdminFallback />}><CategoryForm /></Suspense></RequireAdminAuth></AdminLayout>} />
 
-        {/* Rutas públicas - Interceptadas si está en mantenimiento */}
+        {/* Rutas públicas - Mostrar tienda de inmediato y aplicar mantenimiento solo si está activo */}
         <Route path="*" element={
-          maintenanceLoading ? (
-            <div className="min-h-screen bg-abu-light flex items-center justify-center">
-              <Loader2 size={32} className="animate-spin text-abu-accent" />
-            </div>
-          ) : isMaintenanceMode ? (
+          isMaintenanceMode ? (
             <MaintenancePage />
           ) : (
             <PublicLayout />
@@ -147,10 +151,11 @@ function PublicLayout() {
         {/* Botón oculto para admin */}
         <Link 
           to="/admin" 
-          className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 text-abu-cream/30 hover:text-white transition-colors p-1"
+          aria-label="Acceso administrador"
+          className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 text-abu-cream/50 hover:text-white transition-colors p-1"
           title="Administración"
         >
-          <Lock size={14} />
+          <Lock size={14} aria-hidden="true" />
         </Link>
       </footer>
     </div>

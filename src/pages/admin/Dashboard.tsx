@@ -9,6 +9,7 @@ import { ConfirmModal } from '../../components/ConfirmModal';
 import { collection, getCountFromServer, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import type { Figure } from '../../types';
 import { displayPrice } from '../../utils/format';
+import { getOptimizedImageUrl } from '../../utils/cloudinary';
 
 export function Dashboard() {
   const { user, loading } = useAuthStore();
@@ -26,13 +27,14 @@ export function Dashboard() {
     
     const fetchDashboardData = async () => {
       try {
-        // Obtener conteos reales sin descargar todos los documentos (súper rápido y barato)
-        const productsSnap = await getCountFromServer(collection(db, 'figures'));
-        const categoriesSnap = await getCountFromServer(collection(db, 'categories'));
-        
-        // Obtener los 3 productos más recientes
+        // Obtener conteos y los 3 productos más recientes en paralelo
         const qRecent = query(collection(db, 'figures'), orderBy('createdAt', 'desc'), limit(3));
-        const recentSnap = await getDocs(qRecent);
+        const [productsSnap, categoriesSnap, recentSnap] = await Promise.all([
+          getCountFromServer(collection(db, 'figures')),
+          getCountFromServer(collection(db, 'categories')),
+          getDocs(qRecent),
+        ]);
+        
         const recent = recentSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Figure));
 
         setStats({
@@ -146,9 +148,9 @@ export function Dashboard() {
       {/* Hero Banner */}
       <div className="bg-linear-to-br from-abu-brown to-abu-dark rounded-2xl sm:rounded-3xl p-5 sm:p-8 lg:p-10 text-white shadow-lg relative overflow-hidden">
         <div className="relative z-10">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1 sm:mb-2 flex items-center gap-2">
-              ¡Hola, {userName}! <HandMetal size={28} className="inline-block" />
-            </h2>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1 sm:mb-2 flex items-center gap-2">
+              ¡Hola, {userName}! <HandMetal size={28} className="inline-block" aria-hidden="true" />
+            </h1>
           <p className="text-abu-cream text-sm sm:text-lg max-w-xl opacity-90">
             Bienvenido al centro de control. Desde aquí podés administrar todo tu catálogo.
           </p>
@@ -156,7 +158,7 @@ export function Dashboard() {
         
         {/* Decoración de fondo */}
         <div className="absolute -right-20 -top-20 opacity-10">
-          <PackageSearch size={300} />
+          <PackageSearch size={300} aria-hidden="true" />
         </div>
       </div>
 
@@ -164,9 +166,9 @@ export function Dashboard() {
         
         {/* Columna Izquierda: Acciones (Ocupa 2/3 en desktop) */}
         <div className="lg:col-span-2 flex flex-col gap-4 sm:gap-6">
-          <h3 className="text-base sm:text-xl font-bold text-abu-brown flex items-center gap-2">
-            <TrendingUp className="text-abu-accent" size={20} /> Acciones Rápidas
-          </h3>
+          <h2 className="text-base sm:text-xl font-bold text-abu-brown flex items-center gap-2">
+            <TrendingUp className="text-abu-accent" size={20} aria-hidden="true" /> Acciones Rápidas
+          </h2>
           <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
             {adminActions.map((action, idx) => (
               <Link 
@@ -191,12 +193,12 @@ export function Dashboard() {
           
           {/* Widget Estadísticas Reales */}
           <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-abu-cream shadow-sm flex flex-col gap-3 sm:gap-4">
-            <h3 className="font-bold text-abu-brown text-base sm:text-lg border-b border-abu-cream pb-2.5 sm:pb-3">Resumen de Tienda</h3>
+            <h2 className="font-bold text-abu-brown text-base sm:text-lg border-b border-abu-cream pb-2.5 sm:pb-3">Resumen de Tienda</h2>
             
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2.5 sm:gap-3">
-                <div className="bg-orange-100 text-orange-600 p-2.5 sm:p-3 rounded-xl"><Package size={18} /></div>
-                <span className="font-medium text-gray-600 text-sm">Productos</span>
+                <div className="bg-orange-100 text-orange-600 p-2.5 sm:p-3 rounded-xl"><Package size={18} aria-hidden="true" /></div>
+                <span className="font-medium text-gray-700 text-sm">Productos</span>
               </div>
               <span className="text-xl sm:text-2xl font-black text-abu-brown">
                 {isLoadingStats ? '...' : stats.products}
@@ -205,8 +207,8 @@ export function Dashboard() {
             
             <div className="flex justify-between items-center mt-1 sm:mt-2">
               <div className="flex items-center gap-2.5 sm:gap-3">
-                <div className="bg-blue-100 text-blue-600 p-2.5 sm:p-3 rounded-xl"><Tag size={18} /></div>
-                <span className="font-medium text-gray-600 text-sm">Categorías</span>
+                <div className="bg-blue-100 text-blue-600 p-2.5 sm:p-3 rounded-xl"><Tag size={18} aria-hidden="true" /></div>
+                <span className="font-medium text-gray-700 text-sm">Categorías</span>
               </div>
               <span className="text-xl sm:text-2xl font-black text-abu-brown">
                 {isLoadingStats ? '...' : stats.categories}
@@ -217,14 +219,14 @@ export function Dashboard() {
           {/* Widget Modo Mantenimiento */}
           <div className={`p-4 sm:p-6 rounded-2xl sm:rounded-3xl border shadow-sm flex flex-col gap-3 sm:gap-4 transition-colors ${isMaintenanceMode ? 'bg-amber-50 border-amber-200' : 'bg-white border-abu-cream'}`}>
             <div className="flex items-center gap-3 border-b border-abu-cream pb-2.5 sm:pb-3">
-              <Construction size={20} className={isMaintenanceMode ? 'text-amber-600' : 'text-gray-400'} />
-              <h3 className="font-bold text-abu-brown text-base sm:text-lg">Mantenimiento</h3>
+              <Construction size={20} aria-hidden="true" className={isMaintenanceMode ? 'text-amber-600' : 'text-gray-500'} />
+              <h2 className="font-bold text-abu-brown text-base sm:text-lg">Mantenimiento</h2>
             </div>
             
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <p className="font-medium text-sm text-gray-700">Modo mantenimiento</p>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-xs text-gray-600 mt-0.5">
                   {isMaintenanceMode ? 'La tienda está oculta' : 'La tienda está visible'}
                 </p>
               </div>
@@ -252,24 +254,24 @@ export function Dashboard() {
           {/* Widget Últimos Productos */}
           <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-abu-cream shadow-sm flex flex-col gap-3 sm:gap-4">
             <div className="flex justify-between items-end border-b border-abu-cream pb-2.5 sm:pb-3">
-              <h3 className="font-bold text-abu-brown text-base sm:text-lg">Últimos agregados</h3>
+              <h2 className="font-bold text-abu-brown text-base sm:text-lg">Últimos agregados</h2>
               <Link to="/admin/products" className="text-xs text-abu-accent font-bold hover:underline">Ver todos</Link>
             </div>
             
             <div className="flex flex-col gap-3">
               {isLoadingStats ? (
-                <div className="text-center text-sm text-gray-400 py-4">Cargando...</div>
+                <div className="text-center text-sm text-gray-500 py-4">Cargando...</div>
               ) : recentProducts.length === 0 ? (
-                <div className="text-center text-sm text-gray-400 py-4">Aún no hay productos.</div>
+                <div className="text-center text-sm text-gray-500 py-4">Aún no hay productos.</div>
               ) : (
                 recentProducts.map(prod => (
                   <Link key={prod.id} to={`/admin/products/edit/${prod.id}`} className="flex items-center gap-3 hover:bg-abu-light p-2 rounded-xl transition-colors">
-                    {prod.imageUrl ? <img src={prod.imageUrl} alt={prod.name} className="w-12 h-12 rounded-lg object-cover bg-abu-cream shrink-0" /> : <div className="w-12 h-12 rounded-lg bg-gray-200 shrink-0" />}
+                    {prod.imageUrl ? <img src={getOptimizedImageUrl(prod.imageUrl, 100)} alt={prod.name} loading="lazy" className="w-12 h-12 rounded-lg object-cover bg-abu-cream shrink-0" /> : <div className="w-12 h-12 rounded-lg bg-gray-200 shrink-0" />}
                     <div className="flex-1 overflow-hidden">
                       <p className="font-bold text-sm text-gray-800 truncate">{prod.name}</p>
                       <p className="text-xs font-medium text-abu-accent">{displayPrice(prod.price)}</p>
                     </div>
-                    <ArrowRight size={16} className="text-gray-400" />
+                    <ArrowRight size={16} className="text-gray-500" aria-hidden="true" />
                   </Link>
                 ))
               )}

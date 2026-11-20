@@ -5,7 +5,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { collection, addDoc, getDocs, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { ArrowLeft, Upload, Loader2, Save, ImageIcon, Plus, X, Trash2 } from 'lucide-react';
-import { uploadToCloudinary } from '../../utils/cloudinary';
+import { uploadToCloudinary, getOptimizedImageUrl } from '../../utils/cloudinary';
 
 const BADGES = [
   { value: '', label: 'Sin etiqueta' },
@@ -175,9 +175,17 @@ export function ProductForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !description || (priceMode === 'number' && !price) || (priceMode === 'custom' && !price)) {
+    if (!name.trim() || !description.trim() || (priceMode === 'number' && !price) || (priceMode === 'custom' && !price.trim())) {
       addToast('Por favor, completa los campos principales (nombre, precio, descripción).', 'error');
       return;
+    }
+
+    if (priceMode === 'number') {
+      const numericPrice = Number(price);
+      if (!Number.isFinite(numericPrice) || numericPrice < 0) {
+        addToast('El precio no puede ser negativo ni inválido.', 'error');
+        return;
+      }
     }
 
     if (generalImages.length === 0 && options.length === 0) {
@@ -258,15 +266,16 @@ export function ProductForm() {
       </div>
 
       <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-abu-cream p-5 sm:p-8">
-        <h2 className="text-xl sm:text-2xl font-bold text-abu-brown mb-5 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-abu-brown mb-5 sm:mb-6">
           {isEditing ? 'Editar Figura' : 'Cargar nueva figura'}
-        </h2>
+        </h1>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 sm:gap-5">
           
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Nombre de la figura</label>
+            <label htmlFor="product-name" className="block text-sm font-bold text-gray-700 mb-1">Nombre de la figura</label>
             <input 
+              id="product-name"
               type="text" 
               value={name}
               onChange={e => setName(e.target.value)}
@@ -277,7 +286,7 @@ export function ProductForm() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">Precio</label>
+              <label htmlFor="product-price" className="block text-sm font-bold text-gray-700 mb-1">Precio</label>
               <div className="flex gap-1.5 mb-2">
                 <button
                   type="button"
@@ -303,20 +312,28 @@ export function ProductForm() {
               </div>
               {priceMode === 'number' && (
                 <input 
+                  id="product-price"
                   type="number" 
+                  min="0"
+                  step="any"
                   value={price}
-                  onChange={e => setPrice(e.target.value)}
+                  onChange={e => {
+                    const val = e.target.value;
+                    if (val.startsWith('-')) return;
+                    setPrice(val);
+                  }}
                   placeholder="Ej: 1500" 
                   className="w-full bg-abu-light border border-abu-cream rounded-xl py-2.5 px-4 text-sm focus:outline-none focus:border-abu-accent"
                 />
               )}
               {priceMode === 'consultar' && (
-                <div className="w-full bg-amber-50 border border-amber-200 rounded-xl py-2.5 px-4 text-sm text-amber-700 font-medium">
+                <div className="w-full bg-amber-50 border border-amber-200 rounded-xl py-2.5 px-4 text-sm text-amber-800 font-medium">
                   Se mostrará "Consultar" en lugar del precio
                 </div>
               )}
               {priceMode === 'custom' && (
                 <input 
+                  id="product-price"
                   type="text" 
                   value={price}
                   onChange={e => setPrice(e.target.value)}
@@ -327,8 +344,9 @@ export function ProductForm() {
             </div>
             
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">Categoría</label>
+              <label htmlFor="product-category" className="block text-sm font-bold text-gray-700 mb-1">Categoría</label>
               <select 
+                id="product-category"
                 value={category}
                 onChange={e => setCategory(e.target.value)}
                 className="w-full bg-abu-light border border-abu-cream rounded-xl py-2.5 px-4 text-sm focus:outline-none focus:border-abu-accent"
@@ -342,8 +360,9 @@ export function ProductForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Etiqueta (Badge)</label>
+            <label htmlFor="product-badge" className="block text-sm font-bold text-gray-700 mb-1">Etiqueta (Badge)</label>
             <select 
+              id="product-badge"
               value={badge}
               onChange={e => setBadge(e.target.value)}
               className="w-full bg-abu-light border border-abu-cream rounded-xl py-2.5 px-4 text-sm focus:outline-none focus:border-abu-accent"
@@ -355,8 +374,9 @@ export function ProductForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Descripción</label>
+            <label htmlFor="product-description" className="block text-sm font-bold text-gray-700 mb-1">Descripción</label>
             <textarea 
+              id="product-description"
               value={description}
               onChange={e => setDescription(e.target.value)}
               placeholder="Escribe los detalles de la figura..." 
@@ -367,11 +387,11 @@ export function ProductForm() {
 
           {/* Fotos generales */}
           <div className="pt-4 border-t border-abu-cream">
-            <label className="block text-sm font-bold text-gray-700 mb-2">Fotos de la figura (Generales)</label>
+            <label htmlFor="general-images-input" className="block text-sm font-bold text-gray-700 mb-2">Fotos de la figura (Generales)</label>
             <div className="flex flex-wrap gap-4">
               {generalImages.map(img => (
                 <div key={img.id} className="relative w-24 h-24 sm:w-32 sm:h-32 group">
-                  <img src={img.preview} alt="Vista previa" className="w-full h-full object-cover rounded-xl shadow-sm" />
+                  <img src={img.url ? getOptimizedImageUrl(img.url, 200) : img.preview} alt="Vista previa" className="w-full h-full object-cover rounded-xl shadow-sm" />
                   <button 
                     type="button" 
                     onClick={() => handleRemoveGeneralImage(img.id)}
@@ -379,21 +399,23 @@ export function ProductForm() {
                     title="Eliminar foto"
                     className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-md transition-all active:scale-90 flex items-center justify-center z-10"
                   >
-                    <X size={14} />
+                    <X size={14} aria-hidden="true" />
                   </button>
                 </div>
               ))}
               
               <div className="w-24 h-24 sm:w-32 sm:h-32 border-2 border-dashed border-abu-cream rounded-xl flex flex-col items-center justify-center bg-abu-light/50 hover:bg-abu-light transition-colors relative cursor-pointer">
                 <input 
+                  id="general-images-input"
                   type="file" 
                   accept="image/*"
                   multiple
+                  aria-label="Añadir fotos generales de la figura"
                   onChange={handleAddGeneralImage}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 />
-                <Plus size={24} className="text-gray-400" />
-                <span className="text-xs font-medium text-gray-500 mt-1">Añadir</span>
+                <Plus size={24} className="text-gray-500" aria-hidden="true" />
+                <span className="text-xs font-medium text-gray-600 mt-1">Añadir</span>
               </div>
             </div>
           </div>
@@ -401,18 +423,18 @@ export function ProductForm() {
           {/* Opciones / Variantes */}
           <div className="pt-4 border-t border-abu-cream">
             <div className="flex items-center justify-between mb-4">
-              <label className="block text-sm font-bold text-gray-700">Opciones / Variantes (Ej: Colores, Tipos)</label>
+              <span className="block text-sm font-bold text-gray-700">Opciones / Variantes (Ej: Colores, Tipos)</span>
               <button 
                 type="button" 
                 onClick={handleAddOption}
                 className="text-xs sm:text-sm bg-abu-light hover:bg-abu-cream text-abu-brown px-3 py-1.5 rounded-lg font-semibold transition-colors flex items-center gap-1"
               >
-                <Plus size={16} /> Añadir Opción
+                <Plus size={16} aria-hidden="true" /> Añadir Opción
               </button>
             </div>
             
             {options.length === 0 ? (
-              <p className="text-sm text-gray-500 italic">No hay opciones agregadas. (Opcional)</p>
+              <p className="text-sm text-gray-600 italic">No hay opciones agregadas. (Opcional)</p>
             ) : (
               <div className="space-y-4">
                 {options.map((opt, index) => (
@@ -422,14 +444,15 @@ export function ProductForm() {
                       <input 
                         type="file" 
                         accept="image/*"
+                        aria-label={`Subir foto para opción ${index + 1}`}
                         onChange={(e) => handleOptionImageChange(opt.id, e)}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                       />
                       {opt.preview ? (
                         <>
-                          <img src={opt.preview} alt={opt.name} className="w-full h-full object-cover" />
+                          <img src={opt.imageUrl && !opt.imageFile ? getOptimizedImageUrl(opt.imageUrl, 160) : opt.preview} alt={opt.name || `Opción ${index + 1}`} className="w-full h-full object-cover" />
                           <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                            <Upload size={20} className="text-white" />
+                            <Upload size={20} className="text-white" aria-hidden="true" />
                           </div>
                           <button 
                             type="button" 
@@ -438,12 +461,12 @@ export function ProductForm() {
                             title="Eliminar foto de la opción"
                             className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-md transition-all active:scale-90 flex items-center justify-center z-20"
                           >
-                            <X size={12} />
+                            <X size={12} aria-hidden="true" />
                           </button>
                         </>
                       ) : (
-                        <div className="flex flex-col items-center gap-1 text-gray-400">
-                          <ImageIcon size={20} />
+                        <div className="flex flex-col items-center gap-1 text-gray-500">
+                          <ImageIcon size={20} aria-hidden="true" />
                           <span className="text-[10px] text-center px-1">Subir Foto</span>
                         </div>
                       )}
@@ -452,17 +475,19 @@ export function ProductForm() {
                     {/* Detalles de la opcion */}
                     <div className="flex-1 flex flex-col gap-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-gray-500 uppercase">Opción #{index + 1}</span>
+                        <label htmlFor={`option-name-${opt.id}`} className="text-xs font-bold text-gray-600 uppercase">Opción #{index + 1}</label>
                         <button 
                           type="button"
                           onClick={() => handleRemoveOption(opt.id)}
-                          className="text-red-400 hover:text-red-600 transition-colors"
+                          aria-label={`Eliminar opción ${index + 1}`}
+                          className="text-red-500 hover:text-red-700 transition-colors"
                           title="Eliminar opción"
                         >
-                          <Trash2 size={16} />
+                          <Trash2 size={16} aria-hidden="true" />
                         </button>
                       </div>
                       <input 
+                        id={`option-name-${opt.id}`}
                         type="text" 
                         value={opt.name}
                         onChange={e => handleOptionNameChange(opt.id, e.target.value)}

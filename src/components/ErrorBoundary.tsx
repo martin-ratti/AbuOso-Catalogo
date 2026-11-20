@@ -31,9 +31,9 @@ export class ErrorBoundary extends Component<Props, State> {
           <div className="bg-red-100 p-5 sm:p-6 rounded-full text-red-500 mb-5 sm:mb-6">
             <AlertOctagon size={56} className="sm:w-16 sm:h-16" />
           </div>
-          <h1 className="text-2xl sm:text-4xl font-bold text-abu-brown mb-3 sm:mb-4">¡Ups! Algo salió mal.</h1>
-          <p className="text-gray-600 mb-6 sm:mb-8 max-w-md text-base sm:text-lg">
-            Ocurrió un error inesperado en la aplicación. Nuestro equipo ya fue notificado (mentira, pero lo intentaremos arreglar pronto).
+          <h1 className="text-2xl sm:text-4xl font-bold text-abu-brown mb-3 sm:mb-4">Ocurrió un inconveniente técnico</h1>
+          <p className="text-gray-700 mb-6 sm:mb-8 max-w-md text-base sm:text-lg">
+            No pudimos cargar esta sección correctamente. Por favor, recargá la página o intentá nuevamente en unos instantes.
           </p>
           <button 
             onClick={() => window.location.href = '/'}

@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { collection, onSnapshot, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { ArrowLeft, Trash2, Edit, Plus, Loader2, Tags } from 'lucide-react';
+import { useAuthStore } from '../../store/authStore';
 import { useToastStore } from '../../store/toastStore';
 import { ConfirmModal } from '../../components/ConfirmModal';
 
 export function CategoryList() {
+  const { user, loading: authLoading } = useAuthStore();
   const [categories, setCategories] = useState<{id: string, name: string}[]>([]);
   const [loading, setLoading] = useState(true);
   const addToast = useToastStore(s => s.addToast);
@@ -15,6 +17,7 @@ export function CategoryList() {
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!user) return;
     const q = query(collection(db, 'categories'), orderBy('name', 'asc'));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -27,7 +30,10 @@ export function CategoryList() {
     });
 
     return () => unsubscribe();
-  }, [addToast]);
+  }, [addToast, user]);
+
+  if (authLoading) return <div className="flex-1 flex items-center justify-center"><Loader2 className="animate-spin text-abu-accent" size={32} /></div>;
+  if (!user) return <Navigate to="/admin" replace />;
 
   const handleDeleteConfirm = async () => {
     if (!itemToDelete) return;
@@ -61,9 +67,9 @@ export function CategoryList() {
       </div>
 
       <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-abu-cream p-4 sm:p-6">
-        <h2 className="text-xl sm:text-2xl font-bold text-abu-brown mb-4 sm:mb-6 flex items-center gap-2">
-          <Tags className="text-purple-600" size={24} /> Categorías
-        </h2>
+        <h1 className="text-xl sm:text-2xl font-bold text-abu-brown mb-4 sm:mb-6 flex items-center gap-2">
+          <Tags className="text-purple-600" size={24} aria-hidden="true" /> Categorías
+        </h1>
         
         {loading ? (
           <div className="flex justify-center py-10"><Loader2 className="animate-spin text-abu-accent" size={32} /></div>
@@ -73,16 +79,16 @@ export function CategoryList() {
               <div key={cat.id} className="py-3 sm:py-4 flex items-center justify-between gap-3 sm:gap-4">
                 <span className="font-bold text-abu-dark text-base sm:text-lg truncate">{cat.name}</span>
                 <div className="flex items-center gap-1 shrink-0">
-                  <Link to={`/admin/categories/edit/${cat.id}`} className="p-2 sm:p-2.5 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors active:scale-95">
-                    <Edit size={18} className="sm:w-5 sm:h-5" />
+                  <Link to={`/admin/categories/edit/${cat.id}`} aria-label={`Editar categoría ${cat.name}`} title={`Editar categoría ${cat.name}`} className="p-2 sm:p-2.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-xl transition-colors active:scale-95">
+                    <Edit size={18} className="sm:w-5 sm:h-5" aria-hidden="true" />
                   </Link>
-                  <button onClick={() => setItemToDelete(cat.id)} className="p-2 sm:p-2.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors active:scale-95">
-                    <Trash2 size={18} className="sm:w-5 sm:h-5" />
+                  <button onClick={() => setItemToDelete(cat.id)} aria-label={`Eliminar categoría ${cat.name}`} title={`Eliminar categoría ${cat.name}`} className="p-2 sm:p-2.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl transition-colors active:scale-95">
+                    <Trash2 size={18} className="sm:w-5 sm:h-5" aria-hidden="true" />
                   </button>
                 </div>
               </div>
             ))}
-            {categories.length === 0 && <p className="text-gray-500 py-4 text-center text-sm sm:text-base">No hay categorías dinámicas. Ve a crear una.</p>}
+            {categories.length === 0 && <p className="text-gray-600 py-4 text-center text-sm sm:text-base">No hay categorías dinámicas. Ve a crear una.</p>}
           </div>
         )}
       </div>
