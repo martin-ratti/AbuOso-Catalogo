@@ -1,9 +1,59 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email != null
+        && (request.auth.token.email_verified == true || request.auth.token.firebase.sign_in_provider == 'password');
+    }
+
+    function isValidFigure(data) {
+      return data.name is string
+        && data.name.size() > 0
+        && data.name.size() <= 150
+        && data.description is string
+        && data.description.size() > 0
+        && data.description.size() <= 3000
+        && (
+          (data.price is number && data.price >= 0)
+          || (data.price is string && data.price.size() > 0 && data.price.size() <= 100)
+        )
+        && (!('category' in data) || (data.category is string && data.category.size() <= 100))
+        && (!('badge' in data) || data.badge == null || data.badge in ['stock', 'pedido', 'agotado', 'novedad'])
+        && (!('images' in data) || (data.images is list && data.images.size() <= 20))
+        && (!('options' in data) || (data.options is list && data.options.size() <= 50));
+    }
+
+    function isValidCategory(data) {
+      return data.name is string
+        && data.name.size() > 0
+        && data.name.size() <= 100
+        && (!('iconName' in data) || (data.iconName is string && data.iconName.size() <= 60))
+        && (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 500));
+    }
+
+    match /figures/{figureId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow create, update: if isAdmin() && isValidFigure(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && isValidCategory(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /settings/maintenance {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        && request.resource.data.keys().hasOnly(['enabled'])
+        && request.resource.data.enabled is bool;
+      allow delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

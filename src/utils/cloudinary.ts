@@ -1,5 +1,9 @@
-const CLOUD_NAME = 'dh23yepxy';
-const UPLOAD_PRESET = 'abuoso_unsigned';
+import { auth } from '../firebase';
+
+const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dh23yepxy';
+const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'abuoso_unsigned';
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
+const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
 
 /**
  * Retorna una URL optimizada de Cloudinary con formato y calidad automáticos (f_auto, q_auto).
@@ -15,7 +19,22 @@ export function getOptimizedImageUrl(url?: string | null, width?: number): strin
   return url;
 }
 
+export function validateImageFile(file: File): void {
+  if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+    throw new Error('Formato de imagen no permitido. Usa JPG, PNG, WebP o AVIF.');
+  }
+  if (file.size <= 0 || file.size > MAX_FILE_SIZE_BYTES) {
+    throw new Error('La imagen supera el tamaño máximo permitido (10 MB).');
+  }
+}
+
 export async function uploadToCloudinary(file: File): Promise<string> {
+  if (!auth.currentUser) {
+    throw new Error('Debes iniciar sesión como administrador para subir imágenes.');
+  }
+
+  validateImageFile(file);
+
   // Comprimir la imagen antes de subir
   const compressedBlob = await compressImage(file);
   
